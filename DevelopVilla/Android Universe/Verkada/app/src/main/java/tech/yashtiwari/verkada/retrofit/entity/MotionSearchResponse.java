@@ -11,7 +11,7 @@ public class MotionSearchResponse {
     private List<List<Long>> motionAt = null;
     @SerializedName("nextEndTimeSec")
     @Expose
-    private Integer nextEndTimeSec;
+    private Long nextEndTimeSec;
 
     public List<List<Long>> getMotionAt() {
         return motionAt;
@@ -21,11 +21,11 @@ public class MotionSearchResponse {
         this.motionAt = motionAt;
     }
 
-    public Integer getNextEndTimeSec() {
+    public Long getNextEndTimeSec() {
         return nextEndTimeSec;
     }
 
-    public void setNextEndTimeSec(Integer nextEndTimeSec) {
+    public void setNextEndTimeSec(Long nextEndTimeSec) {
         this.nextEndTimeSec = nextEndTimeSec;
     }
 
