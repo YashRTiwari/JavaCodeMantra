@@ -1,36 +1,41 @@
 package tech.yashtiwari.verkada.dialog;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
-import okhttp3.internal.Util;
 import tech.yashtiwari.verkada.Picker.DatePicker;
 import tech.yashtiwari.verkada.Picker.TimePicker;
 import tech.yashtiwari.verkada.R;
-import tech.yashtiwari.verkada.Utils.CommonUtils;
 import tech.yashtiwari.verkada.Utils.Constant;
 import tech.yashtiwari.verkada.adapter.GVSelectZones;
 import tech.yashtiwari.verkada.databinding.BottomSheetDateDialogLayoutBinding;
 
-public class BottomSheetDateDailog extends BottomSheetDialogFragment implements View.OnClickListener, DatePicker.DatePickerListener, TimePicker.TimePicerListener {
+public class BottomSheetDateDailog extends BottomSheetDialogFragment implements View.OnClickListener, DatePicker.DatePickerListener, TimePicker.TimePicerListener, GVSelectZones.TbListener {
 
     private static BottomSheetDateDailog instance = null;
     private BottomSheetDateDialogLayoutBinding binding;
@@ -44,9 +49,21 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
     private Calendar endCalender = Calendar.getInstance(americaPacific);
     private DateTimeListener listener;
     int widthpx = Resources.getSystem().getDisplayMetrics().widthPixels;
+    private GVSelectZones gvAdapter;
+
+    @Override
+    public void tbCheckListener(boolean isChecked, int position) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (isChecked) {
+                binding.rvSelectZone.getChildAt(position).setBackground(getContext().getDrawable(R.drawable.selected_border));
+            } else {
+                binding.rvSelectZone.getChildAt(position).setBackground(getContext().getDrawable(R.drawable.border));
+            }
+        }
+    }
 
 
-    public interface DateTimeListener{
+    public interface DateTimeListener {
         public void getDateTimeValue(long startDate, long endDate);
     }
 
@@ -69,6 +86,11 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -81,43 +103,59 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
         float height = (float) (width / 4.0);
         height = 3 * height;
         FrameLayout.LayoutParams newLP = new FrameLayout.LayoutParams((int) width, (int) height);
-        binding.gvSelectZone.setAdapter(new GVSelectZones(getContext(), height));
-        binding.gvSelectZone.setLayoutParams(newLP);
+        gvAdapter = new GVSelectZones(getContext(), height, this);
+
+        binding.rvSelectZone.setAdapter(gvAdapter);
+        binding.rvSelectZone.setLayoutManager(new GridLayoutManager(getContext(), 10));
+        binding.rvSelectZone.setLayoutParams(newLP);
 
         binding.iv.setLayoutParams(newLP);
 
-        final float w10 = width/10;
-        final float h10 = height/10;
+        final float w10 = width / 10;
+        final float h10 = height / 10;
 
-        binding.gvSelectZone.setOnTouchListener(new View.OnTouchListener() {
+        binding.rvSelectZone.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                int x = (int)event.getX();
-                int y = (int)event.getY();
+                int x = (int) event.getX();
+                int y = (int) event.getY();
 
-                Log.d(TAG, x+" "+y);
-                Log.d(TAG, "i : "+(x/w10)+" j:"+(y/h10));
+                int i = (int) Math.floor(x / w10);
+                int j = (int) Math.floor(y / h10);
+                int position = j * 10 + i;
 
-                return true;
+                if ((i >= 0 || i < 10) && (j >= 0 || j < 10)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                            binding.rvSelectZone.getChildAt(j * 10 + i) != null) {
+                        binding.rvSelectZone.getChildAt(j * 10 + i)
+                                .setBackground(getActivity().getDrawable(R.drawable.selected_border));
+                    }
+                }
+
+                return false;
             }
         });
 
     }
+
+
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
     }
 
-    private void removeListener(){
+    private void removeListener() {
         listener = null;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        datePicker.removeListener();
-        timePicker.removeListener();
+        if (datePicker != null)
+            datePicker.removeListener();
+        if (timePicker != null)
+            timePicker.removeListener();
     }
 
     @Override
@@ -131,7 +169,7 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
             whichDate = Constant.Date.END;
             openDatePicker();
         } else if (id == R.id.btnSubmit) {
-            listener.getDateTimeValue(startCalender.getTimeInMillis()/1000, endCalender.getTimeInMillis()/1000);
+            listener.getDateTimeValue(startCalender.getTimeInMillis() / 1000, endCalender.getTimeInMillis() / 1000);
             this.dismiss();
         }
 
@@ -166,15 +204,14 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
         if (whichTime == Constant.Time.START) {
             startCalender.set(Calendar.HOUR, hourOfDay);
             startCalender.set(Calendar.MINUTE, minute);
-            binding.tvStart.setText(startCalender.getTimeInMillis()/1000+"");
+            binding.tvStart.setText(startCalender.getTimeInMillis() / 1000 + "");
 
         } else if (whichTime == Constant.Time.END) {
             endCalender.set(Calendar.HOUR, hourOfDay);
             endCalender.set(Calendar.MINUTE, minute);
-            binding.tvEnd.setText(endCalender.getTimeInMillis()/1000+"");
+            binding.tvEnd.setText(endCalender.getTimeInMillis() / 1000 + "");
         }
     }
-
 
 
 }

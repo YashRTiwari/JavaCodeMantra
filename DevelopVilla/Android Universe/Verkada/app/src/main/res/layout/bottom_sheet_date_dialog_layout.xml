@@ -20,12 +20,16 @@
                 android:src="@drawable/dummy"
                 />
 
-            <GridView
-                android:id="@+id/gvSelectZone"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSelectZone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:numColumns="10"
                 apps:listitem="@layout/row_select_zones"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="10"
+                apps:itemCount="100"
                 />
 
 

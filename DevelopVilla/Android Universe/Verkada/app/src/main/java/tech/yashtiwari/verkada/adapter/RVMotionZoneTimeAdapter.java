@@ -34,7 +34,6 @@ public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTi
         if(list != null){
             holder.binding.tvTime.setText(CommonUtils.getDateTimeInString(list.get(position).get(0)));
             holder.binding.tvDuration.setText(list.get(position).get(1).toString());
-
         }
 
     }
