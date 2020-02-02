@@ -3,6 +3,7 @@ package tech.yashtiwari.verkada.adapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,20 +17,26 @@ import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ObservableInt;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.databinding.RowSelectZonesBinding;
+import tech.yashtiwari.verkada.dialog.BSDDViewModel;
 
 public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder> {
 
     private static final String TAG = GVSelectZones.class.getName();
     private Context context;
-    ;
-    private  double height;
+
+    private double height;
     private TbListener listener;
+    private List<Integer> zoneList = new ArrayList<>();
 
     public interface TbListener {
         void tbCheckListener(boolean isChecked, int position);
@@ -54,24 +61,40 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) height);
         holder.binding.tb.setLayoutParams(lp);
-        holder.binding.tb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                listener.tbCheckListener(isChecked, position);
-            }
-        });
+
     }
+
 
     @Override
     public int getItemCount() {
         return 100;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements CompoundButton.OnCheckedChangeListener {
         RowSelectZonesBinding binding;
-        public ViewHolder(RowSelectZonesBinding binding){
+
+        public ViewHolder(RowSelectZonesBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+            this.binding.tb.setOnCheckedChangeListener(this);
+        }
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            listener.tbCheckListener(isChecked, getAdapterPosition());
         }
     }
+
+//    public void updateZone(int pos) {
+//        Log.d(TAG, "updateZone: " + pos);
+//        if (!zoneList.contains(pos)) {
+//            zoneList.add(pos);
+//            notifyItemChanged(zoneList.size() - 1);
+//        } else {
+//            int index = zoneList.indexOf(pos);
+//            zoneList.remove((Integer) pos);
+//            notifyItemChanged(index);
+//        }
+//        Log.d(TAG, "updateZone: "+zoneList);
+//    }
 }

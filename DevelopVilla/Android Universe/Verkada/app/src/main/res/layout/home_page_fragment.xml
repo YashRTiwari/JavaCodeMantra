@@ -23,11 +23,33 @@
             android:orientation="vertical">
 
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvMotionAt"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvMotionAt"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{viewModel.isDataFound ? View.VISIBLE : View.INVISIBLE}"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="10"
+                    tools:listitem="@layout/row_motion_zone_time_adp"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No Data found"
+                    android:layout_gravity="center"
+                    android:visibility="@{viewModel.isDataFound ? View.GONE : View.VISIBLE}"
+                    />
+
+
+
+            </FrameLayout>
+
 
 
             <TextView

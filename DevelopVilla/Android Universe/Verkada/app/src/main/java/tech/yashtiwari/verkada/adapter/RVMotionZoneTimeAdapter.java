@@ -2,13 +2,10 @@ package tech.yashtiwari.verkada.adapter;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
-
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.Utils.CommonUtils;
 import tech.yashtiwari.verkada.databinding.RowMotionZoneTimeAdpBinding;

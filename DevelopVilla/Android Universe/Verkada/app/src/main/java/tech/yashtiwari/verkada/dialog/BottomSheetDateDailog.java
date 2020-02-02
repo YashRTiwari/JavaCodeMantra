@@ -12,10 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ObservableInt;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
@@ -35,7 +39,7 @@ import tech.yashtiwari.verkada.Utils.Constant;
 import tech.yashtiwari.verkada.adapter.GVSelectZones;
 import tech.yashtiwari.verkada.databinding.BottomSheetDateDialogLayoutBinding;
 
-public class BottomSheetDateDailog extends BottomSheetDialogFragment implements View.OnClickListener, DatePicker.DatePickerListener, TimePicker.TimePicerListener, GVSelectZones.TbListener {
+public class BottomSheetDateDailog extends Fragment implements View.OnClickListener, DatePicker.DatePickerListener, TimePicker.TimePicerListener, GVSelectZones.TbListener {
 
     private static BottomSheetDateDailog instance = null;
     private BottomSheetDateDialogLayoutBinding binding;
@@ -48,16 +52,18 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
     private Calendar startCalender = Calendar.getInstance(americaPacific);
     private Calendar endCalender = Calendar.getInstance(americaPacific);
     private DateTimeListener listener;
-    int widthpx = Resources.getSystem().getDisplayMetrics().widthPixels;
     private GVSelectZones gvAdapter;
+    BSDDViewModel viewModel;
+    static float width = Resources.getSystem().getDisplayMetrics().widthPixels;
+    static float height = (float) ((float) 3 * (width / 4.0));
 
     @Override
     public void tbCheckListener(boolean isChecked, int position) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (isChecked) {
-                binding.rvSelectZone.getChildAt(position).setBackground(getContext().getDrawable(R.drawable.selected_border));
+                Log.d(TAG, "tbCheckListener: T =>" + position);
             } else {
-                binding.rvSelectZone.getChildAt(position).setBackground(getContext().getDrawable(R.drawable.border));
+                Log.d(TAG, "tbCheckListener: F      =>" + position);
             }
         }
     }
@@ -82,34 +88,35 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.bottom_sheet_date_dialog_layout, container, false);
+        binding.setViewModel(viewModel);
+        binding.executePendingBindings();
         return binding.getRoot();
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    private void setUpRVZones() {
+        gvAdapter = new GVSelectZones(getContext(), height, this);
+        binding.rvSelectZone.setAdapter(gvAdapter);
+        binding.rvSelectZone.setLayoutManager(new GridLayoutManager(getContext(), 10));
     }
+
+    private BSDDViewModel getViewModel() {
+        return ViewModelProviders
+                .of(this)
+                .get(BSDDViewModel.class);
+    }
+
+    private boolean revertAction = false;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewModel = getViewModel();
 
         binding.btnStart.setOnClickListener(this);
         binding.btnEnd.setOnClickListener(this);
         binding.btnSubmit.setOnClickListener(this);
 
-
-        float width = widthpx;
-        float height = (float) (width / 4.0);
-        height = 3 * height;
-        FrameLayout.LayoutParams newLP = new FrameLayout.LayoutParams((int) width, (int) height);
-        gvAdapter = new GVSelectZones(getContext(), height, this);
-
-        binding.rvSelectZone.setAdapter(gvAdapter);
-        binding.rvSelectZone.setLayoutManager(new GridLayoutManager(getContext(), 10));
-        binding.rvSelectZone.setLayoutParams(newLP);
-
-        binding.iv.setLayoutParams(newLP);
+        setUpRVZones();
 
         final float w10 = width / 10;
         final float h10 = height / 10;
@@ -117,32 +124,59 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
         binding.rvSelectZone.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
                 int x = (int) event.getX();
                 int y = (int) event.getY();
 
                 int i = (int) Math.floor(x / w10);
                 int j = (int) Math.floor(y / h10);
-                int position = j * 10 + i;
+
+                if(event.getAction() == MotionEvent.ACTION_UP)
+                    revertAction = !revertAction;
+
 
                 if ((i >= 0 || i < 10) && (j >= 0 || j < 10)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                            binding.rvSelectZone.getChildAt(j * 10 + i) != null) {
-                        binding.rvSelectZone.getChildAt(j * 10 + i)
-                                .setBackground(getActivity().getDrawable(R.drawable.selected_border));
+                    int position = j * 10 + i;
+                    if (binding.rvSelectZone.getChildAt(position) != null) {
+                        if (revertAction == false) {
+                            ((ToggleButton) binding.rvSelectZone.getChildAt(position)).setChecked(true);
+                        } else {
+                            ((ToggleButton) binding.rvSelectZone.getChildAt(position)).setChecked(false);
+                        }
                     }
                 }
-
                 return false;
             }
         });
 
+
     }
 
+    @BindingAdapter("layout_height")
+    public static void setLayoutHeight(View view, int h) {
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        layoutParams.height = (int) height;
+        view.setLayoutParams(layoutParams);
+    }
+
+    private void subscribeToLiveData() {
+
+//        viewModel.mldZones.observe(this, new Observer<List<Integer>>() {
+//            @Override
+//            public void onChanged(List<Integer> integers) {
+//
+//                for (int x : integers)
+//                    gvAdapter.updateZone(x);
+//            }
+//        });
+
+    }
 
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+
     }
 
     private void removeListener() {
@@ -170,7 +204,6 @@ public class BottomSheetDateDailog extends BottomSheetDialogFragment implements 
             openDatePicker();
         } else if (id == R.id.btnSubmit) {
             listener.getDateTimeValue(startCalender.getTimeInMillis() / 1000, endCalender.getTimeInMillis() / 1000);
-            this.dismiss();
         }
 
     }

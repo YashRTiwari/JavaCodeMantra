@@ -39,7 +39,7 @@ public class HomePageViewModel extends ViewModel {
     public MutableLiveData<List<List<Long>>> mldMotionAt = new MutableLiveData<>();
     private RetrofitInterface apiInterface = RetrofitClient.getInstance().create(RetrofitInterface.class);
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private ObservableBoolean isDataFound = new ObservableBoolean(false);
+    public ObservableBoolean isDataFound = new ObservableBoolean(false);
     public MutableLiveData<Long> mldNextEndTime = new MutableLiveData<>();
     private MotionZonesDatabase db = App.getDatabaseInstance();
 

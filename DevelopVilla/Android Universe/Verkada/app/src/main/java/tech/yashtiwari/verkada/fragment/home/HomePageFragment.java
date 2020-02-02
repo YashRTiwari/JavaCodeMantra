@@ -1,6 +1,7 @@
 package tech.yashtiwari.verkada.fragment.home;
 
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -45,6 +46,7 @@ public class HomePageFragment extends Fragment implements BottomSheetDateDailog.
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.home_page_fragment, container, false);
+        binding.setViewModel(mViewModel);
         return binding.getRoot();
     }
 
@@ -53,7 +55,6 @@ public class HomePageFragment extends Fragment implements BottomSheetDateDailog.
             @Override
             public void onChanged(List<List<Long>> lists) {
                 if(lists != null){
-
                     mAdapter.setList(lists);
                 } else {
                     binding.tv.setText("NO Data found");
@@ -91,8 +92,8 @@ public class HomePageFragment extends Fragment implements BottomSheetDateDailog.
 
     private void openStartEndTimeSelector(){
         dialog = BottomSheetDateDailog.getInstance(HomePageFragment.this);
-        dialog.show(getActivity().getSupportFragmentManager(), BottomSheetDateDailog.TAG);
-        dialog.setCancelable(false);
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.frame, dialog, dialog.TAG).commit();
     }
 
     @Override
