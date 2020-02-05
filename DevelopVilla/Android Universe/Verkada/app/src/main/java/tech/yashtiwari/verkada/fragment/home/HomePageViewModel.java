@@ -26,8 +26,10 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import tech.yashtiwari.verkada.App;
+import tech.yashtiwari.verkada.Utils.CommonUtility;
 import tech.yashtiwari.verkada.retrofit.RetrofitClient;
 import tech.yashtiwari.verkada.retrofit.RetrofitInterface;
+import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
 import tech.yashtiwari.verkada.retrofit.entity.MotionSearchBody;
 import tech.yashtiwari.verkada.retrofit.entity.MotionSearchResponse;
 import tech.yashtiwari.verkada.room.MotionZoneEntity;
@@ -36,7 +38,7 @@ import tech.yashtiwari.verkada.room.MotionZonesDatabase;
 public class HomePageViewModel extends ViewModel {
 
     private static final String TAG = "HomePageViewModel";
-    public MutableLiveData<List<List<Long>>> mldMotionAt = new MutableLiveData<>();
+    public MutableLiveData<List<DateAndDuration>> mldMotionAt = new MutableLiveData<>();
     private RetrofitInterface apiInterface = RetrofitClient.getInstance().create(RetrofitInterface.class);
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     public ObservableBoolean isDataFound = new ObservableBoolean(false);
@@ -66,10 +68,12 @@ public class HomePageViewModel extends ViewModel {
 
                             if (entity != null) {
                                 if (entity.getMotionAt().size() > 0) {
-                                    mldMotionAt.setValue(entity.getMotionAt());
+
+                                    List<DateAndDuration> rvList = CommonUtility.getDateDurationList(entity.getMotionAt());
+                                    mldMotionAt.setValue(rvList);
                                     mldNextEndTime.setValue(entity.getNextEndTimeSec());
                                     isDataFound.set(true);
-                                    addListToDatabase(entity.getMotionAt(), entity.getNextEndTimeSec());
+                                    //addListToDatabase(entity.getMotionAt(), entity.getNextEndTimeSec());
 
                                 } else {
                                     mldMotionAt.setValue(null);

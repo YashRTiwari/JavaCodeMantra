@@ -26,6 +26,7 @@ import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.adapter.RVMotionZoneTimeAdapter;
 import tech.yashtiwari.verkada.databinding.HomePageFragmentBinding;
 import tech.yashtiwari.verkada.dialog.BottomSheetDateDailog;
+import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
 import tech.yashtiwari.verkada.retrofit.entity.MotionSearchBody;
 
 public class HomePageFragment extends Fragment{
@@ -75,11 +76,13 @@ public class HomePageFragment extends Fragment{
         long startDate = data.getLong("start_time");
         long endDate = data.getLong("end_time");
         ArrayList<Integer> zones = data.getIntegerArrayList("zones");
-        Log.d(TAG, "onCreateView: "+zones);
         MotionSearchBody body = new MotionSearchBody();
-        body.setStartTimeSec(startDate);
-        body.setEndTimeSec(endDate);
-        body.setMotionZones( CommonUtility.getListOfArray(zones));
+        body.setStartTimeSec(startDate/1000);
+        body.setEndTimeSec(endDate/1000);
+        ArrayList<List<Integer>> k = CommonUtility.getListOfArray(zones);
+        body.setMotionZones(k );
+        Log.d(TAG, "onCreateView: "+k);
+
         getmViewModel().makeAPICall(body);
         return binding.getRoot();
     }
@@ -87,9 +90,9 @@ public class HomePageFragment extends Fragment{
 
 
     private void subscribeToLiveData(){
-        getmViewModel().mldMotionAt.observe(this, new Observer<List<List<Long>>>() {
+        getmViewModel().mldMotionAt.observe(this, new Observer<List<DateAndDuration>>() {
             @Override
-            public void onChanged(List<List<Long>> lists) {
+            public void onChanged(List<DateAndDuration> lists) {
                 if(lists != null){
                     mAdapter.setList(lists);
                 } else {
@@ -101,7 +104,7 @@ public class HomePageFragment extends Fragment{
         getmViewModel().mldNextEndTime.observe(this, new Observer<Long>() {
             @Override
             public void onChanged(Long nxtEndTime) {
-                binding.tv.setText(CommonUtility.getDateTimeInString(nxtEndTime));
+                binding.tv.setText(CommonUtility.getDateTimeInString(nxtEndTime * 1000));
             }
         });
     }

@@ -9,10 +9,11 @@ import java.util.List;
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.databinding.RowMotionZoneTimeAdpBinding;
+import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
 
 public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTimeAdapter.ViewHolder> {
 
-    private List<List<Long>> list = null;
+    private List<DateAndDuration> list = null;
 
     public RVMotionZoneTimeAdapter(){
     }
@@ -29,13 +30,13 @@ public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTi
     public void onBindViewHolder(@NonNull RVMotionZoneTimeAdapter.ViewHolder holder, int position) {
 
         if(list != null){
-            holder.binding.tvTime.setText(CommonUtility.getDateTimeInString(list.get(position).get(0)));
-            holder.binding.tvDuration.setText(list.get(position).get(1).toString());
+//            holder.binding.tvTime.setText(CommonUtility.getDateTimeInString(list.get(position).get(0)*1000));
+//            holder.binding.tvDuration.setText(list.get(position).get(1).toString());
         }
 
     }
 
-    public void setList(List<List<Long>> list){
+    public void setList(List<DateAndDuration> list){
         this.list  = list;
         notifyDataSetChanged();
     }

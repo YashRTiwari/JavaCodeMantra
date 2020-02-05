@@ -118,7 +118,9 @@ public class BSDDViewModel extends ViewModel {
             Toast.makeText(context, "Select End Time", Toast.LENGTH_SHORT).show();
         } else if (getStartDateTime() == 0) {
             Toast.makeText(context, "Select Start Time", Toast.LENGTH_SHORT).show();
-        } else {
+        } else if (getListZones().size() == 0){
+            Toast.makeText(context, "Select Zones", Toast.LENGTH_SHORT).show();
+        }else {
             Bundle bundle = new Bundle();
             bundle.putLong("start_time", getStartDateTime());
             bundle.putLong("end_time", getEndDateTime());

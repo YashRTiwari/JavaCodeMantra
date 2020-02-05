@@ -5,8 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+
+import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
 
 public class CommonUtility {
 
@@ -17,7 +20,7 @@ public class CommonUtility {
         Calendar calender = Calendar.getInstance();
         calender.setTimeInMillis(dateTimeInSECONDS);
         Date date = calender.getTime();
-        SimpleDateFormat print = new SimpleDateFormat("MMM d, yyyy");
+        SimpleDateFormat print = new SimpleDateFormat("MMM dd yyyy, HH:mm ");
         Date parsedDate = null;
         try {
             parsedDate = sdf.parse(date.toString());
@@ -61,15 +64,59 @@ public class CommonUtility {
     public static final ArrayList<List<Integer>> getListOfArray(ArrayList<Integer> list){
 
         ArrayList<List<Integer>> a = new ArrayList<>();
-        for (int i : list){
+
+        HashSet<Integer> u = new HashSet<>();
+        for (int y : list){
+            u.add(y);
+        }
+
+        for (int i : u){
+
             List<Integer> l = new ArrayList<>();
-            l.add(i/10);
             l.add(i%10);
+            l.add(i/10);
             a.add(l);
         }
 
         return a;
 
+    }
+
+    public static List<DateAndDuration> getDateDurationList(List<List<Long>> lists){
+
+        List<DateAndDuration> result = new ArrayList<>();
+
+        for (List<Long> l : lists){
+            DateAndDuration entity = new DateAndDuration();
+            long time = l.get(0) * 1000;
+            Calendar calender = Calendar.getInstance();
+            calender.setTimeInMillis(time);
+            Date date = calender.getTime();
+            SimpleDateFormat d = new SimpleDateFormat("dd");
+            SimpleDateFormat m = new SimpleDateFormat("MMM");
+            SimpleDateFormat y = new SimpleDateFormat("yyyy");
+            SimpleDateFormat h = new SimpleDateFormat("hh");
+            SimpleDateFormat mm = new SimpleDateFormat("mm");
+
+
+            Date parsedDate = null;
+            try {
+                parsedDate = sdf.parse(date.toString());
+
+                entity.setDay(Integer.parseInt(d.format(parsedDate)));
+                entity.setMonth(Integer.parseInt(m.format(parsedDate)));
+                entity.setYear(Integer.parseInt(y.format(parsedDate)));
+                entity.setHour(Integer.parseInt(h.format(parsedDate)));
+                entity.setMinute(Integer.parseInt(mm.format(parsedDate)));
+                entity.setDuration((int)(long)l.get(1));
+
+                result.add(entity);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
     }
 
 
