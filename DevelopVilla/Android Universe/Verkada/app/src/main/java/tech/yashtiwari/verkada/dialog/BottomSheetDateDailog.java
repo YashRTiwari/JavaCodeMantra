@@ -59,6 +59,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     private boolean revertAction = true;
     private TinyDB tinyDB;
 
+    public BottomSheetDateDailog(){}
 
     @Override
     public void tbCheckListener(boolean isChecked, int position) {

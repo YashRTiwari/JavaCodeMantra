@@ -45,12 +45,9 @@ public class HomePageFragment extends Fragment{
     private static HomePageFragment instance = null;
     private TinyDB tinyDB;
 
-    public HomePageFragment(Navigator navigator){
+    private HomePageFragment(Navigator navigator){
         this.navigator = navigator;
     }
-
-
-
 
     private HomePageViewModel getmViewModel(){
         return ViewModelProviders
@@ -58,12 +55,12 @@ public class HomePageFragment extends Fragment{
                 .get(HomePageViewModel.class);
     }
 
-//    public static HomePageFragment newInstance(Navigator navigator) {
-//        if (instance == null )
-//            return instance = new HomePageFragment(navigator);
-//        else
-//            return instance;
-//    }
+    public static HomePageFragment newInstance(Navigator navigator) {
+        if (instance == null )
+            return instance = new HomePageFragment(navigator);
+        else
+            return instance;
+    }
 
     @Override
     public void onDestroy() {
@@ -72,24 +69,35 @@ public class HomePageFragment extends Fragment{
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.home_page_fragment, container, false);
         binding.setViewModel(getmViewModel());
 
+        if (getArguments() != null){
+            Bundle data = getArguments();
+            long startDate = data.getLong("start_time");
+            long endDate = data.getLong("end_time");
+            ArrayList<Integer> zones = data.getIntegerArrayList("zones");
 
-        Bundle data = getArguments();
-        long startDate = data.getLong("start_time");
-        long endDate = data.getLong("end_time");
-        ArrayList<Integer> zones = data.getIntegerArrayList("zones");
-        MotionSearchBody body = new MotionSearchBody();
-        body.setStartTimeSec(startDate/1000);
-        body.setEndTimeSec(endDate/1000);
-        ArrayList<List<Integer>> k = CommonUtility.getListOfArray(zones);
-        body.setMotionZones(k );
-        Log.d(TAG, "onCreateView: "+k);
+            MotionSearchBody body = new MotionSearchBody();
+            body.setStartTimeSec(startDate/1000);
+            body.setEndTimeSec(endDate/1000);
 
-        getmViewModel().makeAPICall(body);
+            ArrayList<List<Integer>> k = CommonUtility.getListOfArray(zones);
+
+            body.setMotionZones(k);
+
+            getmViewModel().makeAPICall(body);
+        }
+
+
         return binding.getRoot();
     }
 
