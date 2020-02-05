@@ -6,8 +6,18 @@ public class DateAndDuration {
     private int minute;
     private int day;
     private int year;
-    private int month;
+    private String month;
     private int duration;
+
+    public int getoDuration() {
+        return oDuration;
+    }
+
+    public void setoDuration(int oDuration) {
+        this.oDuration = oDuration;
+    }
+
+    private int oDuration;
 
     public int getHour() {
         return hour;
@@ -41,11 +51,11 @@ public class DateAndDuration {
         this.year = year;
     }
 
-    public int getMonth() {
+    public String getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
+    public void setMonth(String month) {
         this.month = month;
     }
 

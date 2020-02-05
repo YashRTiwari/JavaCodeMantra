@@ -17,11 +17,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.R;
+import tech.yashtiwari.verkada.SharedPred.TinyDB;
 import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.adapter.RVMotionZoneTimeAdapter;
 import tech.yashtiwari.verkada.databinding.HomePageFragmentBinding;
@@ -38,6 +43,7 @@ public class HomePageFragment extends Fragment{
     private  RVMotionZoneTimeAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private static HomePageFragment instance = null;
+    private TinyDB tinyDB;
 
     private HomePageFragment(Navigator navigator){
         this.navigator = navigator;
@@ -71,6 +77,7 @@ public class HomePageFragment extends Fragment{
                              @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.home_page_fragment, container, false);
         binding.setViewModel(getmViewModel());
+
 
         Bundle data = getArguments();
         long startDate = data.getLong("start_time");
@@ -114,7 +121,7 @@ public class HomePageFragment extends Fragment{
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mAdapter = new RVMotionZoneTimeAdapter();
+        mAdapter = new RVMotionZoneTimeAdapter(getContext());
         layoutManager = new LinearLayoutManager(getContext());
         binding.rvMotionAt.setLayoutManager(layoutManager);
         binding.rvMotionAt.setAdapter(mAdapter);

@@ -25,11 +25,14 @@ import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.Picker.DatePicker;
 import tech.yashtiwari.verkada.Picker.TimePicker;
 import tech.yashtiwari.verkada.R;
+import tech.yashtiwari.verkada.SharedPred.TinyDB;
 import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.Utils.Constant;
 import tech.yashtiwari.verkada.adapter.GVSelectZones;
 import tech.yashtiwari.verkada.databinding.BottomSheetDateDialogLayoutBinding;
 
+import static tech.yashtiwari.verkada.Utils.Constant.END_DATE;
+import static tech.yashtiwari.verkada.Utils.Constant.START_DATE;
 import static tech.yashtiwari.verkada.Utils.Constant.TAG_YASH;
 
 
@@ -54,6 +57,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     static float height;
     private Navigator navigator;
     private boolean revertAction = true;
+    private TinyDB tinyDB;
 
 
     @Override
@@ -89,6 +93,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
                 container, false);
         viewModel = getViewModel();
         binding.setViewModel(viewModel);
+        tinyDB = new TinyDB(getContext());
         binding.executePendingBindings();
         return binding.getRoot();
     }
@@ -149,10 +154,17 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         super.onViewCreated(view, savedInstanceState);
         Log.d(TAG_YASH, "onViewCreated: ");
         setUpRVZones();
-
         setListeners();
-
         subscribeToLiveData();
+
+        viewModel.setOiStartDate(tinyDB.getLong(START_DATE, 0l));
+        viewModel.setOiEndDate(tinyDB.getLong(END_DATE, 0l));
+        viewModel.setOiStartTime(tinyDB.getLong(START_DATE, 0l));
+        viewModel.setOiEndTime(tinyDB.getLong(END_DATE, 0l));
+
+    }
+
+    public void subscribeToLiveData() {
 
         viewModel.mldZoneList.observe(this, new Observer<List<Integer>>() {
             @Override
@@ -166,12 +178,6 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
                     }
             }
         });
-
-    }
-
-    public void subscribeToLiveData() {
-
-
 
         viewModel.oiEndTime.observe(this, new Observer<Long>() {
             @Override

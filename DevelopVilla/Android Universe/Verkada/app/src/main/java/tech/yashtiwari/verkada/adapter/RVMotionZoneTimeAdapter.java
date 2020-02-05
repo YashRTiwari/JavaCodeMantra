@@ -1,5 +1,6 @@
 package tech.yashtiwari.verkada.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -14,8 +15,10 @@ import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
 public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTimeAdapter.ViewHolder> {
 
     private List<DateAndDuration> list = null;
+    private Context context;
 
-    public RVMotionZoneTimeAdapter(){
+    public RVMotionZoneTimeAdapter(Context context){
+        this.context = context;
     }
 
     @NonNull
@@ -32,6 +35,11 @@ public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTi
         if(list != null){
 //            holder.binding.tvTime.setText(CommonUtility.getDateTimeInString(list.get(position).get(0)*1000));
 //            holder.binding.tvDuration.setText(list.get(position).get(1).toString());
+
+            int duration = list.get(position).getDuration();
+            int oDuration = list.get(position).getoDuration();
+            holder.binding.ivDuration.setImageDrawable(CommonUtility.getSignalDrawable(context, duration));
+            holder.binding.tvOriginalDuration.setText(oDuration+" secs");
         }
 
     }

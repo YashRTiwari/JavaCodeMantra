@@ -5,7 +5,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:background="@drawable/border"
+        android:padding="4dp"
+        android:layout_margin="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20"
+            android:padding="14dp"
+            android:textSize="20sp"
+            android:background="@drawable/bg_date"/>
+
 
         <TextView
             android:id="@+id/tvTime"
@@ -14,12 +26,27 @@
             android:layout_weight="1"
             android:padding="4dp"/>
 
-        <TextView
-            android:id="@+id/tvDuration"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            />
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivDuration"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="fitCenter"
+                />
+
+            <TextView
+                android:id="@+id/tvOriginalDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="123"/>
+
+        </LinearLayout>
+
 
     </LinearLayout>
 

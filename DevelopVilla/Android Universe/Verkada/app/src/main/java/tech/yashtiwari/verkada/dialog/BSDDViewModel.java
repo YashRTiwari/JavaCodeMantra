@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tech.yashtiwari.verkada.Navigator;
+import tech.yashtiwari.verkada.SharedPred.TinyDB;
+import tech.yashtiwari.verkada.Utils.Constant;
 
 
 public class BSDDViewModel extends ViewModel {
@@ -121,11 +123,22 @@ public class BSDDViewModel extends ViewModel {
         } else if (getListZones().size() == 0){
             Toast.makeText(context, "Select Zones", Toast.LENGTH_SHORT).show();
         }else {
+
+            saveToPref();
+
             Bundle bundle = new Bundle();
             bundle.putLong("start_time", getStartDateTime());
             bundle.putLong("end_time", getEndDateTime());
             bundle.putIntegerArrayList("zones", getListZones());
             navigator.moveToHomeFragment(bundle);
         }
+    }
+
+    private void saveToPref() {
+
+        TinyDB tinyDB = new TinyDB(context);
+        tinyDB.putLong(Constant.START_DATE, oiStartDate.getValue());
+        tinyDB.putLong(Constant.END_DATE, oiEndTime.getValue());
+
     }
 }
