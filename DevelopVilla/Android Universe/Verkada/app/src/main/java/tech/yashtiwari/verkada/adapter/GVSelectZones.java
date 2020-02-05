@@ -14,22 +14,12 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.BindingAdapter;
-import androidx.databinding.BindingMethod;
-import androidx.databinding.BindingMethods;
 import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ObservableInt;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.databinding.RowSelectZonesBinding;
-import tech.yashtiwari.verkada.dialog.BSDDViewModel;
 
 public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder> {
 
@@ -44,16 +34,13 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
         void tbCheckListener(boolean isChecked, int position);
     }
 
-//    public GVSelectZones(Context context, float height) {
-//        this.context = context;
-//        this.height = height / 10.0;
-//    }
-
-    public GVSelectZones(Context context, float height, TbListener listener) {
+    public GVSelectZones(Context context, float height, TbListener listener ) {
         this.context = context;
         this.listener = listener;
         this.height = height / 10.0;
+
     }
+
 
 
     @NonNull
@@ -64,22 +51,13 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
         return new GVSelectZones.ViewHolder(binding);
     }
 
-
-    public void addListOfZones(List<Integer> zoneList){
-        Log.d(TAG, "onViewCreated: "+zoneList.size());
-        this.zoneList = zoneList;
-        Log.d(TAG, "onViewCreated: "+zoneList.size());
-
-        notifyDataSetChanged();
-    }
-
-    public void addRemoveZones(int zone) {
-        if (!zoneList.contains(zone)) {
-            Log.d(TAG, "addRemoveZones: "+zone);
+    public void addRemoveZones(int zone, boolean add) {
+        boolean contains =  zoneList.contains(zone);
+        Log.d(TAG, "addRemoveZones: ");
+        if (!contains && add) {
             this.zoneList.add(zone);
             notifyItemChanged(zone);
-        } else {
-            Log.d(TAG, "removeZone: "+zone);
+        } else if (contains && !add){
             this.zoneList.remove((Integer) zone);
             notifyItemChanged(zone);
         }
@@ -125,8 +103,6 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
             super(binding.getRoot());
             this.binding = binding;
             this.binding.tb.setOnCheckedChangeListener(this);
-
-
         }
 
         @Override

@@ -60,6 +60,7 @@ public class HomePageViewModel extends ViewModel {
                         String response = null;
                         try {
                             response = responseBody.string();
+                            Log.d(TAG, "onNext: "+response);
                             MotionSearchResponse entity = new Gson().fromJson(response, new TypeToken<MotionSearchResponse>() {
                             }.getType());
 
@@ -115,22 +116,24 @@ public class HomePageViewModel extends ViewModel {
                 .subscribe(new Consumer<List<MotionZoneEntity>>() {
                     @Override
                     public void accept(List<MotionZoneEntity> motionZoneEntities) throws Exception {
-                        if (motionZoneEntities.size() > 0) {
-                            Log.d(TAG, "Data found in memory");
-                            List<List<Long>> data = new ArrayList<>();
-                            for (MotionZoneEntity e : motionZoneEntities) {
-                                List<Long> l = new ArrayList<>();
-                                l.add(e.getTimeInSec());
-                                l.add(e.getDurationSexc());
-                                data.add(l);
-                            }
+//                        if (motionZoneEntities.size() > 0) {
+//                            Log.d(TAG, "Data found in memory");
+//                            List<List<Long>> data = new ArrayList<>();
+//                            for (MotionZoneEntity e : motionZoneEntities) {
+//                                List<Long> l = new ArrayList<>();
+//                                l.add(e.getTimeInSec());
+//                                l.add(e.getDurationSexc());
+//                                data.add(l);
+//                            }
+//
+//                            Log.d(TAG,"FOUND Start==>"+data.get(0).get(0));
+//                            Log.d(TAG,"FOUND End  ==>"+data.get(data.size() -1).get(0));
+//                        } else {
+//                            Log.d(TAG, "Data not found in memory");
+//
+//                        }
 
-                            Log.d(TAG,"FOUND Start==>"+data.get(0).get(0));
-                            Log.d(TAG,"FOUND End  ==>"+data.get(data.size() -1).get(0));
-                        } else {
-                            Log.d(TAG, "Data not found in memory");
-                            makeAPICall(body);
-                        }
+                        //makeAPICall(body);
                     }
                 });
 

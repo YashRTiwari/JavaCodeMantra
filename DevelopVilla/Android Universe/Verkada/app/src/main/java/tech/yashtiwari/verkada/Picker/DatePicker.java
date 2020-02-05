@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.Calendar;
@@ -17,9 +18,13 @@ public class DatePicker extends DialogFragment
 
     private DatePickerListener mListener;
     public static final String TAG = "DatePicker";
+    private long maxDate;
+    private long minDate;
 
-    public DatePicker(DatePickerListener listener){
+    public DatePicker(DatePickerListener listener,  long maxDate, long minDate){
         this.mListener = listener;
+        this.minDate = minDate;
+        this.maxDate =maxDate;
     }
 
     @Override
@@ -30,7 +35,12 @@ public class DatePicker extends DialogFragment
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
         // Create a new instance of DatePickerDialog and return it
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+        DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
+        android.widget.DatePicker picker = dialog.getDatePicker();
+        picker.setMaxDate(maxDate);
+        picker.setMinDate(minDate);
+
+        return dialog;
     }
 
     @Override

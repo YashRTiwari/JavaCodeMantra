@@ -12,6 +12,7 @@
         android:background="@drawable/border"
         android:textOff=""
         android:textOn=""
+        android:layout_margin="1dp"
         />
 
 </layout>

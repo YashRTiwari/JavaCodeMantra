@@ -7,7 +7,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import tech.yashtiwari.verkada.R;
-import tech.yashtiwari.verkada.Utils.CommonUtils;
+import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.databinding.RowMotionZoneTimeAdpBinding;
 
 public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTimeAdapter.ViewHolder> {
@@ -29,7 +29,7 @@ public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTi
     public void onBindViewHolder(@NonNull RVMotionZoneTimeAdapter.ViewHolder holder, int position) {
 
         if(list != null){
-            holder.binding.tvTime.setText(CommonUtils.getDateTimeInString(list.get(position).get(0)));
+            holder.binding.tvTime.setText(CommonUtility.getDateTimeInString(list.get(position).get(0)));
             holder.binding.tvDuration.setText(list.get(position).get(1).toString());
         }
 

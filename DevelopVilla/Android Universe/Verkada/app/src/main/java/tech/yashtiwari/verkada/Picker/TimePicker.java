@@ -30,10 +30,9 @@ public class TimePicker extends DialogFragment
         final Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
-
+        TimePickerDialog dialog = new TimePickerDialog(getActivity(), this, hour, minute, true);
         // Create a new instance of TimePickerDialog and return it
-        return new TimePickerDialog(getActivity(), this, hour, minute,
-                DateFormat.is24HourFormat(getActivity()));
+        return dialog;
     }
 
     @Override

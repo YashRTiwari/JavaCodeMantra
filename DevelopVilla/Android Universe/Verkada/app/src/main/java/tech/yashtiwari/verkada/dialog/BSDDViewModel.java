@@ -3,7 +3,9 @@ package tech.yashtiwari.verkada.dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableBoolean;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -13,51 +15,115 @@ import java.util.List;
 
 import tech.yashtiwari.verkada.Navigator;
 
-import static tech.yashtiwari.verkada.Utils.Constant.TAG_YASH;
 
 public class BSDDViewModel extends ViewModel {
 
-
+    private static final String TAG = "BSDDViewModel";
+    private final CommunicateInterface communicateInterface;
     private Context context;
     private Navigator navigator;
-    public List<Integer> zones = new ArrayList<>();
-    public MutableLiveData<Integer> mldZones = new MutableLiveData<>();
-    private static final String TAG = "BSDDViewModel";
-    ObservableBoolean configurationChange = new ObservableBoolean(false);
+
+    public ObservableArrayList<Integer> zones = new ObservableArrayList<>();
+
+    public MutableLiveData<List<Integer>> mldZoneList = new MutableLiveData<>();
+
+    public MutableLiveData<Long> oiStartDate = new MutableLiveData<Long>();
+    public MutableLiveData<Long> oiEndDate = new MutableLiveData<Long>();
+    public MutableLiveData<Long> oiStartTime = new MutableLiveData<Long>();
+    public MutableLiveData<Long> oiEndTime = new MutableLiveData<Long>();
 
 
-    public BSDDViewModel(Context context, Navigator navigator) {
+    public BSDDViewModel(Context context, Navigator navigator, CommunicateInterface communicateInterface) {
         this.context = context;
         this.navigator = navigator;
+        this.communicateInterface = communicateInterface;
+        Log.d(TAG, "BSDDViewModel: ");
     }
 
 
+    /*TODO*/
     public void updateListZones(int position, boolean add) {
-        boolean contains = zones.contains(position);
-        if (!contains && add){
-            zones.add(position);
-            mldZones.setValue(position);
-
-        } else if (contains && !add){
+        Log.d(TAG, "updateListZones: ");
+        if (!add)
             zones.remove((Integer) position);
-            mldZones.setValue(position);
-
-        }
-
+        else
+            zones.add(position);
+        communicateInterface.pushDataToAdapterList(position, add);
     }
 
+    public void update() {
+        Log.d(TAG, "update: ");
+        mldZoneList.setValue(zones);
+    }
 
     public ArrayList<Integer> getListZones() {
-        return (ArrayList<Integer>) this.zones;
+        return this.zones;
     }
 
-    public void moveDataToHomePage(long start, long end) {
+    public void setOiStartDate(long oiStartDate) {
+        Log.d(TAG, "setOiStartDate: " + oiStartDate);
+        this.oiStartDate.setValue(oiStartDate);
+    }
 
-        Bundle bundle = new Bundle();
-        bundle.putLong("start_time", start);
-        bundle.putLong("end_time", end);
-        bundle.putIntegerArrayList("zones", getListZones());
-        navigator.moveToHomeFragment(bundle);
+    public void setOiEndDate(long oiEndDate) {
+        Log.d(TAG, "setOiEndDate: "+oiEndDate);
+        this.oiEndDate.setValue(oiEndDate);
+    }
 
+    public void setOiStartTime(long oiStartTime) {
+
+        Log.d(TAG, "setOiStartTime: "+oiStartTime);
+        this.oiStartTime.setValue(oiStartTime);
+    }
+
+    public void setOiEndTime(long oiEndTime) {
+
+        Log.d(TAG, "setOiEndTime: "+oiEndTime);
+        this.oiEndTime.setValue(oiEndTime);
+    }
+
+    private long getStartDateTime() {
+        if (oiStartDate != null){
+            if (oiStartTime != null){
+                if (oiStartTime.getValue() != 0)
+                    return oiStartTime.getValue();
+            }
+            return oiStartDate.getValue();
+        } else
+            return 0;
+
+
+
+    }
+
+    private long getEndDateTime() {
+
+        if (oiEndDate != null){
+            if (oiEndTime != null){
+                if (oiEndTime.getValue() != 0)
+                    return oiEndTime.getValue();
+            }
+            else return oiEndDate.getValue();
+        }
+        return 0;
+
+
+    }
+
+    public void moveDataToHomePage() {
+
+        if (getStartDateTime() > getEndDateTime()) {
+            Toast.makeText(context, "Time invalid", Toast.LENGTH_SHORT).show();
+        } else if (getEndDateTime() == 0) {
+            Toast.makeText(context, "Select End Time", Toast.LENGTH_SHORT).show();
+        } else if (getStartDateTime() == 0) {
+            Toast.makeText(context, "Select Start Time", Toast.LENGTH_SHORT).show();
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putLong("start_time", getStartDateTime());
+            bundle.putLong("end_time", getEndDateTime());
+            bundle.putIntegerArrayList("zones", getListZones());
+            navigator.moveToHomeFragment(bundle);
+        }
     }
 }

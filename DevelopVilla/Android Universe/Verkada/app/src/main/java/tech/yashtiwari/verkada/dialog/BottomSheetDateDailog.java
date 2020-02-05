@@ -8,7 +8,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,20 +19,25 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import java.util.Calendar;
-import java.util.TimeZone;
+import java.util.List;
 
 import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.Picker.DatePicker;
 import tech.yashtiwari.verkada.Picker.TimePicker;
 import tech.yashtiwari.verkada.R;
+import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.Utils.Constant;
 import tech.yashtiwari.verkada.adapter.GVSelectZones;
 import tech.yashtiwari.verkada.databinding.BottomSheetDateDialogLayoutBinding;
 
+import static tech.yashtiwari.verkada.Utils.Constant.TAG_YASH;
+
+
 public class BottomSheetDateDailog extends Fragment implements View.OnClickListener,
         DatePicker.DatePickerListener,
         TimePicker.TimePicerListener,
-        GVSelectZones.TbListener {
+        GVSelectZones.TbListener,
+        CommunicateInterface {
 
     private static BottomSheetDateDailog instance = null;
     private BottomSheetDateDialogLayoutBinding binding;
@@ -42,9 +46,8 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     private Constant.Time whichTime;
     TimePicker timePicker;
     DatePicker datePicker;
-    TimeZone americaPacific = TimeZone.getTimeZone("UTC");
-    private Calendar startCalender = Calendar.getInstance(americaPacific);
-    private Calendar endCalender = Calendar.getInstance(americaPacific);
+    private Calendar startCalender = Calendar.getInstance();
+    private Calendar endCalender = Calendar.getInstance();
     private GVSelectZones gvAdapter;
     BSDDViewModel viewModel;
     static float width;
@@ -56,10 +59,11 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     @Override
     public void tbCheckListener(boolean isChecked, int position) {
         viewModel.updateListZones(position, isChecked);
+        Log.d(TAG_YASH, "tbCheckListener: ");
     }
 
 
-    public BottomSheetDateDailog(){
+    public BottomSheetDateDailog() {
 
     }
 
@@ -74,20 +78,16 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         return instance;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        viewModel.configurationChange.set(true);
-        Log.d(TAG, "onDestroy: ");
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        Log.d(TAG_YASH, "onCreateView: ");
         width = Resources.getSystem().getDisplayMetrics().widthPixels;
         height = (float) ((float) 3 * (width / 4.0));
-        binding = DataBindingUtil.inflate(inflater, R.layout.bottom_sheet_date_dialog_layout, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.bottom_sheet_date_dialog_layout,
+                container, false);
+        viewModel = getViewModel();
         binding.setViewModel(viewModel);
         binding.executePendingBindings();
         return binding.getRoot();
@@ -97,32 +97,30 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         gvAdapter = new GVSelectZones(getContext(), height, this);
         binding.rvSelectZone.setAdapter(gvAdapter);
         binding.rvSelectZone.setLayoutManager(new GridLayoutManager(getContext(), 10));
+        Log.d(TAG_YASH, "setUpRVZones: ");
     }
 
     private BSDDViewModel getViewModel() {
+        Log.d(TAG_YASH, "getViewModel: ");
         return ViewModelProviders
-                .of(this, new BSDDViewModelFactory(getContext(), navigator))
+                .of(this, new BSDDViewModelFactory(getContext(), navigator, this))
                 .get(BSDDViewModel.class);
     }
 
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        viewModel = getViewModel();
-        setUpRVZones();
-
-
+    public void setListeners() {
+        binding.tvEndDate.setOnClickListener(this);
+        binding.tvEndTime.setOnClickListener(this);
+        binding.tvStartDate.setOnClickListener(this);
+        binding.tvStartTime.setOnClickListener(this);
         binding.btnSubmit.setOnClickListener(this);
-
-
-
-        final float w10 = width / 10;
-        final float h10 = height / 10;
+        Log.d(TAG_YASH, "setListeners: ");
 
         binding.rvSelectZone.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+                final float w10 = width / 10;
+                final float h10 = height / 10;
 
                 int x = (int) event.getX();
                 int y = (int) event.getY();
@@ -133,7 +131,6 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
                 if ((i >= 0 || i < 10) && (j >= 0 || j < 10)) {
                     int position = j * 10 + i;
                     viewModel.updateListZones(position, revertAction);
-
                 }
                 return false;
             }
@@ -142,22 +139,82 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         binding.tbSelectDeselect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.d(TAG, "onCheckedChanged: reverAction => " + isChecked);
                 revertAction = isChecked;
             }
         });
+    }
 
-        viewModel.mldZones.observe(this, new Observer<Integer>() {
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG_YASH, "onViewCreated: ");
+        setUpRVZones();
+
+        setListeners();
+
+        subscribeToLiveData();
+
+        viewModel.mldZoneList.observe(this, new Observer<List<Integer>>() {
             @Override
-            public void onChanged(Integer integers) {
-                gvAdapter.addRemoveZones(integers);
+            public void onChanged(List<Integer> integers) {
+                Log.d(TAG_YASH, "onChanged: ");
+                if (integers != null)
+                    if (integers.size() > 0) {
+                        Log.d(TAG_YASH, "onChanged: >0");
+                        for (Integer x : integers)
+                            gvAdapter.addRemoveZones(x, true);
+                    }
             }
         });
-        if (viewModel.configurationChange.get()){
-            Log.d(TAG, "onViewCreated: "+viewModel.zones.size());
-            gvAdapter.addListOfZones(viewModel.zones);
-        }
 
+    }
+
+    public void subscribeToLiveData() {
+
+
+
+        viewModel.oiEndTime.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+                if (aLong != 0l)
+                    binding.tvEndTime.setText(CommonUtility.getTimeInString(aLong));
+            }
+        });
+
+        viewModel.oiStartTime.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+                if (aLong != 0l)
+                    binding.tvStartTime.setText(CommonUtility.getTimeInString(aLong));
+
+            }
+        });
+
+        viewModel.oiEndDate.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+
+                if (aLong != 0l)
+                    binding.tvEndDate.setText(CommonUtility.getDateInString(aLong));
+
+            }
+        });
+
+        viewModel.oiStartDate.observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+                if (aLong != 0l || aLong != null)
+                    binding.tvStartDate.setText(CommonUtility.getDateInString(aLong));
+
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG_YASH, "onDestroy: ");
+        viewModel.update();
+        super.onDestroy();
 
     }
 
@@ -182,57 +239,77 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View v) {
         int id = v.getId();
-//        if (id == R.id.btnStart) {
-//            whichDate = Constant.Date.START;
-//            openDatePicker();
-//        } else if (id == R.id.btnEnd) {
-//            whichDate = Constant.Date.END;
-//            openDatePicker();
-//        } else if (id == R.id.btnSubmit) {
-//            viewModel.moveDataToHomePage(startCalender.getTimeInMillis() / 1000,
-//                    endCalender.getTimeInMillis() / 1000);
-//        }
+        switch (id) {
+            case R.id.tvStartDate:
+                openDatePicker(Constant.Date.START);
+                break;
+            case R.id.tvEndDate:
+                openDatePicker(Constant.Date.END);
+                break;
+            case R.id.tvStartTime:
+                openTimePicker(Constant.Time.START);
+                break;
+            case R.id.tvEndTime:
+                openTimePicker(Constant.Time.END);
+                break;
+            case R.id.btnSubmit:
+                viewModel.moveDataToHomePage();
+                break;
+        }
     }
 
 
-    private void openTimePicker() {
+    private void openTimePicker(Constant.Time time) {
+        whichTime = time;
         timePicker = new TimePicker(this);
         timePicker.show(getFragmentManager(), TimePicker.TAG);
     }
 
-    private void openDatePicker() {
-        datePicker = new DatePicker(this);
+    private void openDatePicker(Constant.Date date) {
+        whichDate = date;
+        if (whichDate == Constant.Date.START){
+            datePicker = new DatePicker(this, System.currentTimeMillis(), 0);
+        } else {
+            datePicker = new DatePicker(this, System.currentTimeMillis(), startCalender.getTimeInMillis());
+        }
+        
         datePicker.show(getFragmentManager(), DatePicker.TAG);
     }
 
 
-    /*TODO : Make different section for selection.*/
     @Override
     public void onDateSet(int year, int month, int dayOfMonth) {
-        if (whichDate == Constant.Date.START) {
-            startCalender.set(year, month, dayOfMonth);
-            whichTime = Constant.Time.START;
+        Log.d(TAG_YASH, "onDateSet: "+year+" "+month+" "+dayOfMonth);
 
+        if (whichDate == Constant.Date.START) {
+            startCalender.set(year, month-1, dayOfMonth);
+            viewModel.setOiStartDate(startCalender.getTimeInMillis());
         } else if (whichDate == Constant.Date.END) {
-            whichTime = Constant.Time.END;
-            endCalender.set(year, month, dayOfMonth);
+            endCalender.set(year, month-1, dayOfMonth);
+            viewModel.setOiEndDate(endCalender.getTimeInMillis());
         }
-        openTimePicker();
     }
 
     @Override
     public void onTimeSet(int hourOfDay, int minute) {
-        if (whichTime == Constant.Time.START) {
-            startCalender.set(Calendar.HOUR, hourOfDay);
-            startCalender.set(Calendar.MINUTE, minute);
-//            binding.tvStart.setText(startCalender.getTimeInMillis() / 1000 + "");
+        Log.d(TAG_YASH, "onDateSet: "+hourOfDay+" "+minute);
 
+        if (whichTime == Constant.Time.START) {
+            startCalender.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            startCalender.set(Calendar.MINUTE, minute);
+            viewModel.setOiStartTime(startCalender.getTimeInMillis());
         } else if (whichTime == Constant.Time.END) {
-            endCalender.set(Calendar.HOUR, hourOfDay);
+            endCalender.set(Calendar.HOUR_OF_DAY, hourOfDay);
             endCalender.set(Calendar.MINUTE, minute);
-//            binding.tvEnd.setText(endCalender.getTimeInMillis() / 1000 + "");
+            viewModel.setOiEndTime(endCalender.getTimeInMillis());
         }
     }
 
 
+    @Override
+    public void pushDataToAdapterList(int pos, boolean add) {
+        Log.d(TAG_YASH, "pushDataToAdapterList: ");
+        if (gvAdapter != null)
+            gvAdapter.addRemoveZones(pos, add);
+    }
 }

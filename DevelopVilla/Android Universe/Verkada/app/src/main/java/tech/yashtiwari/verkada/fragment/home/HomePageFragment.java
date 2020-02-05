@@ -1,7 +1,6 @@
 package tech.yashtiwari.verkada.fragment.home;
 
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -23,7 +22,7 @@ import java.util.List;
 
 import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.R;
-import tech.yashtiwari.verkada.Utils.CommonUtils;
+import tech.yashtiwari.verkada.Utils.*;
 import tech.yashtiwari.verkada.adapter.RVMotionZoneTimeAdapter;
 import tech.yashtiwari.verkada.databinding.HomePageFragmentBinding;
 import tech.yashtiwari.verkada.dialog.BottomSheetDateDailog;
@@ -32,7 +31,6 @@ import tech.yashtiwari.verkada.retrofit.entity.MotionSearchBody;
 public class HomePageFragment extends Fragment{
 
     private Navigator navigator;
-    private HomePageViewModel mViewModel;
     public static final String TAG = "HomePageFragment";
     private HomePageFragmentBinding binding;
     private BottomSheetDateDailog dialog;
@@ -46,6 +44,12 @@ public class HomePageFragment extends Fragment{
 
     public HomePageFragment(){
 
+    }
+
+    private HomePageViewModel getmViewModel(){
+        return ViewModelProviders
+                .of(this)
+                .get(HomePageViewModel.class);
     }
 
     public static HomePageFragment newInstance(Navigator navigator) {
@@ -65,20 +69,25 @@ public class HomePageFragment extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.home_page_fragment, container, false);
-        binding.setViewModel(mViewModel);
+        binding.setViewModel(getmViewModel());
 
         Bundle data = getArguments();
         long startDate = data.getLong("start_time");
         long endDate = data.getLong("end_time");
         ArrayList<Integer> zones = data.getIntegerArrayList("zones");
-
-        Log.d(TAG, "onCreateView: "+startDate+" "+endDate+" "+zones.size());
-
+        Log.d(TAG, "onCreateView: "+zones);
+        MotionSearchBody body = new MotionSearchBody();
+        body.setStartTimeSec(startDate);
+        body.setEndTimeSec(endDate);
+        body.setMotionZones( CommonUtility.getListOfArray(zones));
+        getmViewModel().makeAPICall(body);
         return binding.getRoot();
     }
 
+
+
     private void subscribeToLiveData(){
-        mViewModel.mldMotionAt.observe(this, new Observer<List<List<Long>>>() {
+        getmViewModel().mldMotionAt.observe(this, new Observer<List<List<Long>>>() {
             @Override
             public void onChanged(List<List<Long>> lists) {
                 if(lists != null){
@@ -89,10 +98,10 @@ public class HomePageFragment extends Fragment{
             }
         });
 
-        mViewModel.mldNextEndTime.observe(this, new Observer<Long>() {
+        getmViewModel().mldNextEndTime.observe(this, new Observer<Long>() {
             @Override
             public void onChanged(Long nxtEndTime) {
-                binding.tv.setText(CommonUtils.getDateTimeInString(nxtEndTime));
+                binding.tv.setText(CommonUtility.getDateTimeInString(nxtEndTime));
             }
         });
     }
@@ -101,7 +110,7 @@ public class HomePageFragment extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(HomePageViewModel.class);
+
         mAdapter = new RVMotionZoneTimeAdapter();
         layoutManager = new LinearLayoutManager(getContext());
         binding.rvMotionAt.setLayoutManager(layoutManager);
