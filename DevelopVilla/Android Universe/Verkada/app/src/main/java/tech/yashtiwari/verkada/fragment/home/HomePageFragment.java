@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.Utils.CommonUtils;
 import tech.yashtiwari.verkada.adapter.RVMotionZoneTimeAdapter;
@@ -27,19 +29,36 @@ import tech.yashtiwari.verkada.databinding.HomePageFragmentBinding;
 import tech.yashtiwari.verkada.dialog.BottomSheetDateDailog;
 import tech.yashtiwari.verkada.retrofit.entity.MotionSearchBody;
 
-public class HomePageFragment extends Fragment implements BottomSheetDateDailog.DateTimeListener {
+public class HomePageFragment extends Fragment{
 
+    private Navigator navigator;
     private HomePageViewModel mViewModel;
     public static final String TAG = "HomePageFragment";
     private HomePageFragmentBinding binding;
     private BottomSheetDateDailog dialog;
     private  RVMotionZoneTimeAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private static HomePageFragment instance = null;
 
+    private HomePageFragment(Navigator navigator){
+        this.navigator = navigator;
+    }
 
+    public HomePageFragment(){
 
-    public static HomePageFragment newInstance() {
-        return new HomePageFragment();
+    }
+
+    public static HomePageFragment newInstance(Navigator navigator) {
+        if (instance == null )
+            return instance = new HomePageFragment(navigator);
+        else
+            return instance;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        instance = null;
     }
 
     @Override
@@ -47,6 +66,14 @@ public class HomePageFragment extends Fragment implements BottomSheetDateDailog.
                              @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.home_page_fragment, container, false);
         binding.setViewModel(mViewModel);
+
+        Bundle data = getArguments();
+        long startDate = data.getLong("start_time");
+        long endDate = data.getLong("end_time");
+        ArrayList<Integer> zones = data.getIntegerArrayList("zones");
+
+        Log.d(TAG, "onCreateView: "+startDate+" "+endDate+" "+zones.size());
+
         return binding.getRoot();
     }
 
@@ -57,7 +84,7 @@ public class HomePageFragment extends Fragment implements BottomSheetDateDailog.
                 if(lists != null){
                     mAdapter.setList(lists);
                 } else {
-                    binding.tv.setText("NO Data found");
+                    binding.tv.setText("No Data found");
                 }
             }
         });
@@ -79,40 +106,10 @@ public class HomePageFragment extends Fragment implements BottomSheetDateDailog.
         layoutManager = new LinearLayoutManager(getContext());
         binding.rvMotionAt.setLayoutManager(layoutManager);
         binding.rvMotionAt.setAdapter(mAdapter);
-
-        binding.btnOpen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openStartEndTimeSelector();
-            }
-        });
-
         subscribeToLiveData();
     }
 
-    private void openStartEndTimeSelector(){
-        dialog = BottomSheetDateDailog.getInstance(HomePageFragment.this);
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.frame, dialog, dialog.TAG).commit();
-    }
 
-    @Override
-    public void getDateTimeValue(long startDate, long endDate) {
-        MotionSearchBody body = new MotionSearchBody();
-        body.setStartTimeSec(startDate);
-        body.setEndTimeSec(endDate);
-        List<Integer>  list = new ArrayList<>();
-        list.add(5);
-        list.add(5);
-        List<List<Integer>> ll = new ArrayList<>();
-        ll.add(list);
-        body.setMotionZones(ll);
-
-        mViewModel.checkIfInCache(startDate, endDate, body);
-        /*Check if database contains the object*/
-
-
-    }
 
 
 }

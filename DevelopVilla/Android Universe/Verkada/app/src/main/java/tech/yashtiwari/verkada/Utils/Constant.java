@@ -8,4 +8,7 @@ public class Constant {
     public enum Time{
         START, END
     }
+
+    public static final String TAG_YASH = "TAG_YASH";
+
 }

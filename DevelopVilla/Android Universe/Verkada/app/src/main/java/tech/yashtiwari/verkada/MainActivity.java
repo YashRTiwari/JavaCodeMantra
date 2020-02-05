@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import io.reactivex.disposables.CompositeDisposable;
 import tech.yashtiwari.verkada.databinding.ActivityMainBinding;
@@ -12,7 +13,7 @@ import tech.yashtiwari.verkada.fragment.home.HomePageFragment;
 import tech.yashtiwari.verkada.retrofit.RetrofitInterface;
 import tech.yashtiwari.verkada.room.MotionZonesDatabase;
 
-public class MainActivity extends AppCompatActivity /*implements BottomSheetDateDailog.DateTimeListener*/ {
+public class MainActivity extends AppCompatActivity implements Navigator {
 
     RetrofitInterface apiInterface;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -24,19 +25,30 @@ public class MainActivity extends AppCompatActivity /*implements BottomSheetDate
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        HomePageFragment fragment = HomePageFragment.newInstance();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.frame, fragment, HomePageFragment.TAG).commit();
-
+        Log.d(TAG, "onCreate: ");
+        moveToBDSSFragment(null);
         MotionZonesDatabase db = App.getDatabaseInstance();
-        db.getMotionZoneDAO().delete();
-
-
-
 
     }
 
+
+    @Override
+    public void moveToBDSSFragment(Bundle bundle) {
+        BottomSheetDateDailog fragment = BottomSheetDateDailog.getInstance(this);
+        if (bundle != null)
+            fragment.setArguments(bundle);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.frame, fragment, BottomSheetDateDailog.TAG).commit();
+    }
+
+    @Override
+    public void moveToHomeFragment(Bundle bundle) {
+        HomePageFragment fragment = HomePageFragment.newInstance(this);
+        if (bundle != null)
+            fragment.setArguments(bundle);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.frame, fragment, HomePageFragment.TAG).commit();
+    }
 
 }
 
