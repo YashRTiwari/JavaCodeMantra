@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import io.reactivex.disposables.CompositeDisposable;
 import tech.yashtiwari.verkada.databinding.ActivityMainBinding;
@@ -15,11 +16,7 @@ import tech.yashtiwari.verkada.room.MotionZonesDatabase;
 
 public class MainActivity extends AppCompatActivity implements Navigator {
 
-    RetrofitInterface apiInterface;
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private static final String TAG = "MainActivity";
-    private ActivityMainBinding binding;
-    private BottomSheetDateDailog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,27 +25,37 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         Log.d(TAG, "onCreate: ");
         moveToBDSSFragment(null);
         MotionZonesDatabase db = App.getDatabaseInstance();
-
     }
 
 
     @Override
     public void moveToBDSSFragment(Bundle bundle) {
-        BottomSheetDateDailog fragment = BottomSheetDateDailog.getInstance(this);
+        BottomSheetDateDailog fragment = new BottomSheetDateDailog(this);
         if (bundle != null)
             fragment.setArguments(bundle);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.frame, fragment, BottomSheetDateDailog.TAG).commit();
+        transaction.replace(R.id.frame, fragment, BottomSheetDateDailog.TAG).commitAllowingStateLoss();
     }
 
     @Override
     public void moveToHomeFragment(Bundle bundle) {
-        HomePageFragment fragment = HomePageFragment.newInstance(this);
+        HomePageFragment fragment = new HomePageFragment(this);
         if (bundle != null)
             fragment.setArguments(bundle);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack(fragment.TAG);
         transaction.add(R.id.frame, fragment, HomePageFragment.TAG).commit();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            finish();
+        }
+        else {
+            while(getSupportFragmentManager().getBackStackEntryCount() != 0){
+                getSupportFragmentManager().popBackStackImmediate();
+            }
+        }
+    }
 }
 

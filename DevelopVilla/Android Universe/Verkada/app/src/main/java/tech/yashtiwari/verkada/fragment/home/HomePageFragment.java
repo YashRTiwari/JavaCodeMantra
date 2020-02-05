@@ -45,13 +45,12 @@ public class HomePageFragment extends Fragment{
     private static HomePageFragment instance = null;
     private TinyDB tinyDB;
 
-    private HomePageFragment(Navigator navigator){
+    public HomePageFragment(Navigator navigator){
         this.navigator = navigator;
     }
 
-    public HomePageFragment(){
 
-    }
+
 
     private HomePageViewModel getmViewModel(){
         return ViewModelProviders
@@ -59,12 +58,12 @@ public class HomePageFragment extends Fragment{
                 .get(HomePageViewModel.class);
     }
 
-    public static HomePageFragment newInstance(Navigator navigator) {
-        if (instance == null )
-            return instance = new HomePageFragment(navigator);
-        else
-            return instance;
-    }
+//    public static HomePageFragment newInstance(Navigator navigator) {
+//        if (instance == null )
+//            return instance = new HomePageFragment(navigator);
+//        else
+//            return instance;
+//    }
 
     @Override
     public void onDestroy() {

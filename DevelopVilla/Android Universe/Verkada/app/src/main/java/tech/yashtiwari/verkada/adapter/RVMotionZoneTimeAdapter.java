@@ -32,14 +32,15 @@ public class RVMotionZoneTimeAdapter extends RecyclerView.Adapter<RVMotionZoneTi
     @Override
     public void onBindViewHolder(@NonNull RVMotionZoneTimeAdapter.ViewHolder holder, int position) {
 
-        if(list != null){
-//            holder.binding.tvTime.setText(CommonUtility.getDateTimeInString(list.get(position).get(0)*1000));
-//            holder.binding.tvDuration.setText(list.get(position).get(1).toString());
 
-            int duration = list.get(position).getDuration();
-            int oDuration = list.get(position).getoDuration();
+        if(list != null){
+            DateAndDuration entity = list.get(position);
+            int duration = entity.getDuration();
+            int oDuration = entity.getoDuration();
             holder.binding.ivDuration.setImageDrawable(CommonUtility.getSignalDrawable(context, duration));
             holder.binding.tvOriginalDuration.setText(oDuration+" secs");
+            holder.binding.tvDay.setText(entity.getMonth()+" "+entity.getDay());
+            holder.binding.tvTime.setText(entity.getHour()+" : "+entity.getMinute());
         }
 
     }

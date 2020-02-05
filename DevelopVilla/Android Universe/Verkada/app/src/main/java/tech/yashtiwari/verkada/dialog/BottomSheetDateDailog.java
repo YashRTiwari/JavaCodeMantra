@@ -67,20 +67,18 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     }
 
 
-    public BottomSheetDateDailog() {
 
-    }
 
-    private BottomSheetDateDailog(Navigator navigator) {
+    public BottomSheetDateDailog(Navigator navigator) {
         this.navigator = navigator;
     }
 
-    public static BottomSheetDateDailog getInstance(Navigator navigator) {
-        if (instance == null) {
-            instance = new BottomSheetDateDailog(navigator);
-        }
-        return instance;
-    }
+//    public static BottomSheetDateDailog getInstance(Navigator navigator) {
+//        if (instance == null) {
+//            instance = new BottomSheetDateDailog(navigator);
+//        }
+//        return instance;
+//    }
 
     @Nullable
     @Override
