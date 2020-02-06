@@ -8,7 +8,26 @@ public class MotionZoneEntity {
 
     @PrimaryKey(autoGenerate = true)
     long id;
+    long sT = -1;
+    long eT = -1;
     long timeInSec = -1l;
+
+    public long getsT() {
+        return sT;
+    }
+
+    public void setsT(long sT) {
+        this.sT = sT;
+    }
+
+    public long geteT() {
+        return eT;
+    }
+
+    public void seteT(long eT) {
+        this.eT = eT;
+    }
+
     long nextEndTimeSec = -1l;
     long durationSec = 0;
     String hashCode = "";

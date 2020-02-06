@@ -30,7 +30,6 @@ public interface MotionZoneDataAccessObject {
     @Insert
     void insertZone(MotionZoneEntity entity);
 
-
     /**
      *
      * @param start - start time in seconds
@@ -38,7 +37,7 @@ public interface MotionZoneDataAccessObject {
      * @param hashCode - unique value of zones selected
      * @return
      */
-    @Query("Select * from motionzoneentity WHERE timeInSec >= :start AND timeInSec <= :end AND hashCode = :hashCode")
+    @Query("Select * from motionzoneentity WHERE sT = :start AND eT = :end AND hashCode = :hashCode")
     Observable<List<MotionZoneEntity>> getMotionsBetween(long start, long end, String hashCode);
 
     @Delete

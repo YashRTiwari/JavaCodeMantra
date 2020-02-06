@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         if (savedInstanceState == null)
             moveToBDSSFragment(null);
 
+        App.getDatabaseInstance().getMotionZoneDAO().delete();
     }
 
     @Override

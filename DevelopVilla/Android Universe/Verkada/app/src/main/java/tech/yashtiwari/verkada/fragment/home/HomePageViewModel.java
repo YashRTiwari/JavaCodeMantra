@@ -39,7 +39,7 @@ public class HomePageViewModel extends ViewModel {
     private MotionZonesDatabase db = App.getDatabaseInstance();
     public ObservableBoolean noDataFound = new ObservableBoolean(false);
 
-    private void makeAPICall(MotionSearchBody motionSearchBody, final String hashCode) {
+    private void makeAPICall(final MotionSearchBody motionSearchBody, final String hashCode) {
 
         apiInterface.motionSearch(motionSearchBody)
                 .subscribeOn(Schedulers.io())
@@ -59,7 +59,7 @@ public class HomePageViewModel extends ViewModel {
                             Log.d(TAG, "onNext: "+response);
                             MotionSearchResponse entity = new Gson().fromJson(response, new TypeToken<MotionSearchResponse>() {
                             }.getType());
-                            addListToDatabase(entity.getMotionAt(), hashCode);
+                            addListToDatabase(motionSearchBody.getStartTimeSec(), motionSearchBody.getEndTimeSec(), entity.getMotionAt(), hashCode);
                             showListInRecyclerView(CommonUtility.getDateDurationList(entity.getMotionAt()));
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -96,12 +96,14 @@ public class HomePageViewModel extends ViewModel {
         }
     }
 
-    private void addListToDatabase(List<List<Long>> motionAt, String hashCode) {
+    private void addListToDatabase(long sT, long eT, List<List<Long>> motionAt, String hashCode) {
         Log.d(TAG, "addListToDatabase: ");
         for (List<Long> l : motionAt) {
             long time = l.get(0);
             long duration = l.get(1);
             MotionZoneEntity entity = new MotionZoneEntity();
+            entity.setsT(sT);
+            entity.seteT(eT);
             entity.setTimeInSec(time);
             entity.setDurationSec(duration);
             entity.setHashCode(hashCode);
