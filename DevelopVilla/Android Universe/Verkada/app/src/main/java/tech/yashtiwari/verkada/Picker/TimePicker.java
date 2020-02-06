@@ -15,7 +15,7 @@ public class TimePicker extends DialogFragment
     public static final String TAG = "TimePicker";
 
     public interface TimePicerListener{
-        public void onTimeSet(int hourOfDay, int minute);
+        void onTimeSet(int hourOfDay, int minute);
     }
 
     TimePicerListener listener;

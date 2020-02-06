@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         BottomSheetDateDailog bottomSheetDateDailog = new BottomSheetDateDailog(this);
         if (bundle != null)
             bottomSheetDateDailog.setArguments(bundle);
-        transaction.add(R.id.frame, bottomSheetDateDailog, bottomSheetDateDailog.TAG);
+        transaction.add(R.id.frame, bottomSheetDateDailog, BottomSheetDateDailog.TAG);
         transaction.commit();
     }
 
@@ -55,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         HomePageFragment homePageFragment = HomePageFragment.newInstance(this);
         if (bundle != null)
             homePageFragment.setArguments(bundle);
-        transaction.add(R.id.frame, homePageFragment, homePageFragment.TAG);
-        transaction.addToBackStack(homePageFragment.TAG);
+        transaction.add(R.id.frame, homePageFragment, HomePageFragment.TAG);
+        transaction.addToBackStack(HomePageFragment.TAG);
         transaction.commit();
 
     }

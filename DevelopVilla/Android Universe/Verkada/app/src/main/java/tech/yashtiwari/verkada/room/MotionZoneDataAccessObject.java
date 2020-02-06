@@ -21,14 +21,14 @@ public interface MotionZoneDataAccessObject {
      * @return - returns whole data stored in the table
      */
     @Query("Select * from motionzoneentity")
-    public Observable<List<MotionZoneEntity>> getAllMotionZones();
+    Observable<List<MotionZoneEntity>> getAllMotionZones();
 
     /**
      *
      * @param entity - Data to be stored
      */
     @Insert
-    public void insertZone(MotionZoneEntity entity);
+    void insertZone(MotionZoneEntity entity);
 
 
     /**
@@ -39,7 +39,7 @@ public interface MotionZoneDataAccessObject {
      * @return
      */
     @Query("Select * from motionzoneentity WHERE timeInSec >= :start AND timeInSec <= :end AND hashCode = :hashCode")
-    public Observable<List<MotionZoneEntity>> getMotionsBetween(long start, long end, String hashCode);
+    Observable<List<MotionZoneEntity>> getMotionsBetween(long start, long end, String hashCode);
 
     @Delete
     void delete(MotionZoneEntity entity);
