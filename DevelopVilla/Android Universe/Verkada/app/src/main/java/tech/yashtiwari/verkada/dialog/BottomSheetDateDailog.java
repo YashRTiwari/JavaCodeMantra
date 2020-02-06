@@ -87,6 +87,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
             width = Resources.getSystem().getDisplayMetrics().widthPixels;
             height = (float) ((float) 3 * (width / 4.0));
             setLayoutHeight(binding.iv, (int) height);
+            setLayoutHeight(binding.rvSelectZone, (int) height);
             if (gvAdapter != null)
                 gvAdapter.setItemHeight(height / 10);
         }

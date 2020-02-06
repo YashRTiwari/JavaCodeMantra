@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -94,6 +95,12 @@ public class CommonUtility {
     public static final ArrayList<List<Integer>> getListOfArray(ArrayList<Integer> list) {
         ArrayList<List<Integer>> a = new ArrayList<>();
         Iterator<Integer> liU = list.iterator();
+
+        HashSet<Integer> u = new HashSet<>();
+        for (int y : list){
+            u.add(y);
+        }
+
         while (liU.hasNext()) {
             List<Integer> l = new ArrayList<>();
             int i = liU.next();
