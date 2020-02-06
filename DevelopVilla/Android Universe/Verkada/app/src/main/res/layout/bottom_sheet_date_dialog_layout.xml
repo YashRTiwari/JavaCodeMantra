@@ -51,6 +51,9 @@
                         android:layout_weight="1"
                         android:background="@drawable/border"
                         android:paddingTop="8dp"
+                        android:text="Date"
+                        android:textAlignment="center"
+                        android:paddingLeft="10dp"
                         android:paddingBottom="8dp" />
 
                     <TextView
@@ -61,7 +64,10 @@
                         android:background="@drawable/border"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
-                        android:textAlignment="viewEnd" />
+                        android:text="Time"
+                        android:textAlignment="center"
+                        android:paddingRight="10dp"
+                         />
 
                 </LinearLayout>
 
@@ -83,6 +89,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@drawable/border"
+                        android:text="Date"
+                        android:paddingLeft="10dp"
+                        android:textAlignment="center"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp" />
 
@@ -93,8 +102,10 @@
                         android:layout_weight="1"
                         android:background="@drawable/border"
                         android:paddingTop="8dp"
+                        android:text="Time"
+                        android:paddingRight="10dp"
                         android:paddingBottom="8dp"
-                        android:textAlignment="viewEnd" />
+                        android:textAlignment="center" />
 
                 </LinearLayout>
 
@@ -110,7 +121,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
                     <ToggleButton
                         android:id="@+id/tbSelectDeselect"

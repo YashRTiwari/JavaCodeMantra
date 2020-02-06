@@ -69,6 +69,7 @@ public class BSDDViewModel extends ViewModel {
         return this.zones;
     }
 
+
     public void setOiStartDate(long oiStartDate) {
         Log.d(TAG, "setOiStartDate: " + oiStartDate);
         this.oiStartDate.setValue(oiStartDate);
@@ -141,7 +142,6 @@ public class BSDDViewModel extends ViewModel {
 
     public void setZones(ArrayList<Integer> z){
 
-
         if (z == null)
             return;
         ListIterator<Integer> li = z.listIterator();
@@ -155,7 +155,6 @@ public class BSDDViewModel extends ViewModel {
         TinyDB tinyDB = new TinyDB(context);
         tinyDB.putLong(Constant.START_DATE, oiStartDate.getValue());
         tinyDB.putLong(Constant.END_DATE, oiEndTime.getValue());
-        tinyDB.putListInt(Constant.LAST_ZONES, getListZones());
 
     }
 }

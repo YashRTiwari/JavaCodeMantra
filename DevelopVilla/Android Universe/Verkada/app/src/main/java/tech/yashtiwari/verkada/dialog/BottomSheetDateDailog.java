@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,11 +64,12 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     private boolean revertAction = true;
     private TinyDB tinyDB;
 
-    public BottomSheetDateDailog(){}
+    public BottomSheetDateDailog() {
+    }
 
     @Override
     public void tbCheckListener(boolean isChecked, int position) {
-        viewModel.updateListZones(position, isChecked,false);
+        viewModel.updateListZones(position, isChecked, false);
         Log.d(TAG_YASH, "tbCheckListener: ");
     }
 
@@ -81,12 +83,12 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         super.onConfigurationChanged(newConfig);
         Log.d(TAG, "onConfigurationChanged: ");
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ||
-        newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+                newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             width = Resources.getSystem().getDisplayMetrics().widthPixels;
             height = (float) ((float) 3 * (width / 4.0));
             setLayoutHeight(binding.iv, (int) height);
-            if (gvAdapter!=null)
-                gvAdapter.setItemHeight(height/10);
+            if (gvAdapter != null)
+                gvAdapter.setItemHeight(height / 10);
         }
     }
 
@@ -148,7 +150,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
 
                 if ((i >= 0 || i < 10) && (j >= 0 || j < 10)) {
                     int position = j * 10 + i;
-                    viewModel.updateListZones(position, revertAction,true);
+                    viewModel.updateListZones(position, revertAction, true);
                 }
                 return false;
             }
@@ -175,7 +177,6 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         viewModel.setOiEndDate(tinyDB.getLong(END_DATE, 0l));
         viewModel.setOiStartTime(tinyDB.getLong(START_DATE, 0l));
         viewModel.setOiEndTime(tinyDB.getLong(END_DATE, 0l));
-        viewModel.setZones(tinyDB.getListInt(LAST_ZONES));
 
     }
 
@@ -224,7 +225,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         viewModel.oiStartDate.observe(this, new Observer<Long>() {
             @Override
             public void onChanged(Long aLong) {
-                if (aLong != 0l || aLong != null)
+                if (aLong != 0l)
                     binding.tvStartDate.setText(CommonUtility.getDateInString(aLong));
 
             }
@@ -287,44 +288,56 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
 
     private void openTimePicker(Constant.Time time) {
         whichTime = time;
-        timePicker = new TimePicker(this);
-        timePicker.show(getFragmentManager(), TimePicker.TAG);
+        if (whichTime == Constant.Time.START && viewModel.oiStartDate.getValue() > 0) {
+            timePicker = new TimePicker(this);
+
+        }
+        if (whichTime == Constant.Time.END && viewModel.oiEndDate.getValue() > 0) {
+            timePicker = new TimePicker(this);
+        }
+
+        if (timePicker != null)
+            timePicker.show(getFragmentManager(), TimePicker.TAG);
     }
 
     private void openDatePicker(Constant.Date date) {
         whichDate = date;
-        if (whichDate == Constant.Date.START){
+        if (whichDate == Constant.Date.START) {
             datePicker = new DatePicker(this, System.currentTimeMillis(), 0);
-        } else {
-            datePicker = new DatePicker(this, System.currentTimeMillis(), startCalender.getTimeInMillis());
         }
-        
-        datePicker.show(getFragmentManager(), DatePicker.TAG);
+
+        if (viewModel.oiStartDate.getValue() > 0 && whichDate == Constant.Date.END) {
+            datePicker = new DatePicker(this, System.currentTimeMillis(), viewModel.oiStartDate.getValue());
+        }
+
+        if (datePicker != null)
+            datePicker.show(getFragmentManager(), DatePicker.TAG);
     }
 
 
     @Override
     public void onDateSet(int year, int month, int dayOfMonth) {
-        Log.d(TAG_YASH, "onDateSet: "+year+" "+month+" "+dayOfMonth);
+        Log.d(TAG_YASH, "onDateSet: " + year + " " + month + " " + dayOfMonth);
 
         if (whichDate == Constant.Date.START) {
-            startCalender.set(year, month-1, dayOfMonth);
+            startCalender.set(year, month - 1, dayOfMonth);
             viewModel.setOiStartDate(startCalender.getTimeInMillis());
         } else if (whichDate == Constant.Date.END) {
-            endCalender.set(year, month-1, dayOfMonth);
+            endCalender.set(year, month - 1, dayOfMonth);
             viewModel.setOiEndDate(endCalender.getTimeInMillis());
         }
     }
 
     @Override
     public void onTimeSet(int hourOfDay, int minute) {
-        Log.d(TAG_YASH, "onDateSet: "+hourOfDay+" "+minute);
+        Log.d(TAG_YASH, "onDateSet: " + hourOfDay + " " + minute);
 
         if (whichTime == Constant.Time.START) {
             startCalender.set(Calendar.HOUR_OF_DAY, hourOfDay);
             startCalender.set(Calendar.MINUTE, minute);
             viewModel.setOiStartTime(startCalender.getTimeInMillis());
-        } else if (whichTime == Constant.Time.END) {
+        }
+        if (whichTime == Constant.Time.END) {
             endCalender.set(Calendar.HOUR_OF_DAY, hourOfDay);
             endCalender.set(Calendar.MINUTE, minute);
             viewModel.setOiEndTime(endCalender.getTimeInMillis());

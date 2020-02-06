@@ -10,17 +10,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import tech.yashtiwari.verkada.App;
@@ -39,8 +35,9 @@ public class HomePageViewModel extends ViewModel {
     public MutableLiveData<List<DateAndDuration>> mldMotionAt = new MutableLiveData<>();
     private RetrofitInterface apiInterface = RetrofitClient.getInstance().create(RetrofitInterface.class);
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    public ObservableBoolean isDataFound = new ObservableBoolean(false);
+    public ObservableBoolean dataLoading = new ObservableBoolean(true);
     private MotionZonesDatabase db = App.getDatabaseInstance();
+    public ObservableBoolean noDataFound = new ObservableBoolean(false);
 
     private void makeAPICall(MotionSearchBody motionSearchBody, final String hashCode) {
 
@@ -89,10 +86,12 @@ public class HomePageViewModel extends ViewModel {
         if (rvList != null) {
             if (rvList.size() > 0) {
                 mldMotionAt.setValue(rvList);
-                isDataFound.set(true);
+                dataLoading.set(false);
+                noDataFound.set(false);
             } else {
                 mldMotionAt.setValue(null);
-                isDataFound.set(false);
+                dataLoading.set(false);
+                noDataFound.set(true);
             }
         }
     }
@@ -113,8 +112,7 @@ public class HomePageViewModel extends ViewModel {
 
     public void checkIfInCache(final MotionSearchBody body, final String hashCode) {
 
-
-
+        dataLoading.set(true);
         db.getMotionZoneDAO()
                 .getMotionsBetween(body.getStartTimeSec(), body.getEndTimeSec(),
                         hashCode)
@@ -125,6 +123,7 @@ public class HomePageViewModel extends ViewModel {
                     public void accept(List<MotionZoneEntity> motionZoneEntities) throws Exception {
                         if (motionZoneEntities.size() > 0) {
                             showListInRecyclerView(CommonUtility.getDateDurationList2(motionZoneEntities));
+                            noDataFound.set(false);
                         } else {
                             Log.d(TAG, "Data not found in memory");
                             makeAPICall(body, hashCode);
