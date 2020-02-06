@@ -123,11 +123,11 @@ public class BSDDViewModel extends ViewModel {
 
         if (getStartDateTime() > getEndDateTime()) {
             Toast.makeText(context, "Start time cannot be greater than end time, check time.", Toast.LENGTH_SHORT).show();
-        } else if (getEndDateTime() == 0) {
-            Toast.makeText(context, "Select End Time", Toast.LENGTH_SHORT).show();
         } else if (getStartDateTime() == 0) {
             Toast.makeText(context, "Select Start Time", Toast.LENGTH_SHORT).show();
-        } else if (getListZones().size() == 0){
+        } else if (getEndDateTime() == 0) {
+            Toast.makeText(context, "Select End Time", Toast.LENGTH_SHORT).show();
+        }  else if (getListZones().size() == 0){
             Toast.makeText(context, "Select Zones", Toast.LENGTH_SHORT).show();
         }else {
             saveToPref();
