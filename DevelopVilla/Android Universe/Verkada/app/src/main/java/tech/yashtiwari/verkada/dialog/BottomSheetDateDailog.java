@@ -1,5 +1,6 @@
 package tech.yashtiwari.verkada.dialog;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import java.util.Calendar;
 import java.util.List;
 
+import tech.yashtiwari.verkada.MainActivity;
 import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.Picker.DatePicker;
 import tech.yashtiwari.verkada.Picker.TimePicker;
@@ -67,19 +69,28 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         Log.d(TAG_YASH, "tbCheckListener: ");
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
-
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "onConfigurationChanged: ");
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ||
+        newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+            width = Resources.getSystem().getDisplayMetrics().widthPixels;
+            height = (float) ((float) 3 * (width / 4.0));
+            setLayoutHeight(binding.iv, (int) height);
+            if (gvAdapter!=null)
+                gvAdapter.setItemHeight(height/10);
+        }
+    }
 
     public BottomSheetDateDailog(Navigator navigator) {
         this.navigator = navigator;
     }
-
-//    public static BottomSheetDateDailog getInstance(Navigator navigator) {
-//        if (instance == null) {
-//            instance = new BottomSheetDateDailog(navigator);
-//        }
-//        return instance;
-//    }
 
     @Nullable
     @Override
@@ -218,7 +229,8 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
     @Override
     public void onDestroy() {
         Log.d(TAG_YASH, "onDestroy: ");
-        viewModel.update();
+        if (viewModel != null)
+            viewModel.update();
         super.onDestroy();
 
     }
@@ -317,4 +329,6 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         if (gvAdapter != null)
             gvAdapter.addRemoveZones(pos, add);
     }
+
+
 }

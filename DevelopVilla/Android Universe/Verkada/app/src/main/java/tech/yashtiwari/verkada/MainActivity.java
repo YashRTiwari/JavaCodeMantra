@@ -2,9 +2,11 @@ package tech.yashtiwari.verkada;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
@@ -20,9 +22,6 @@ import tech.yashtiwari.verkada.room.MotionZonesDatabase;
 public class MainActivity extends AppCompatActivity implements Navigator {
 
     private static final String TAG = "MainActivity";
-    HomePageFragment homePageFragment;
-    BottomSheetDateDailog bottomSheetDateDailog;
-
 
 
     @Override
@@ -30,60 +29,45 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(TAG, "onCreate: ");
-
-        FragmentManager manager = getSupportFragmentManager();
-        bottomSheetDateDailog = (BottomSheetDateDailog) manager.findFragmentByTag(BottomSheetDateDailog.TAG);
-        homePageFragment = (HomePageFragment) manager.findFragmentByTag(HomePageFragment.TAG);
-
-        if (bottomSheetDateDailog != null){
-            Log.d(TAG, "onCreate: bottomSheetDateDailog");
-        }
-
-        if (homePageFragment != null){
-            Log.d(TAG, "onCreate: homePageFragment");
-        } else {
+        if (savedInstanceState == null)
             moveToBDSSFragment(null);
-        }
-
         MotionZonesDatabase db = App.getDatabaseInstance();
     }
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE || newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+
+        }
+    }
 
     @Override
     public void moveToBDSSFragment(Bundle bundle) {
-        bottomSheetDateDailog = new BottomSheetDateDailog(this);
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        BottomSheetDateDailog bottomSheetDateDailog = new BottomSheetDateDailog(this);
         if (bundle != null)
             bottomSheetDateDailog.setArguments(bundle);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame, bottomSheetDateDailog, BottomSheetDateDailog.TAG).commitAllowingStateLoss();
+        transaction.add(R.id.frame, bottomSheetDateDailog, bottomSheetDateDailog.TAG);
+        transaction.addToBackStack(bottomSheetDateDailog.TAG);
+        transaction.commit();
+
     }
 
     @Override
     public void moveToHomeFragment(Bundle bundle) {
-
-        homePageFragment = HomePageFragment.newInstance(this);
-
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        HomePageFragment homePageFragment = HomePageFragment.newInstance(this);
         if (bundle != null)
             homePageFragment.setArguments(bundle);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction().addToBackStack(HomePageFragment.TAG);
-        transaction.replace(R.id.frame, homePageFragment, HomePageFragment.TAG).commitAllowingStateLoss();
+        transaction.add(R.id.frame, homePageFragment, homePageFragment.TAG);
+        transaction.addToBackStack(homePageFragment.TAG);
+        transaction.commit();
+
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-//        super.onSaveInstanceState(outState, outPersistentState);
-    }
 
-    @Override
-    public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            finish();
-        }
-        else {
-            while(getSupportFragmentManager().getBackStackEntryCount() != 0){
-                getSupportFragmentManager().popBackStackImmediate();
-            }
-        }
-    }
 }
 

@@ -41,6 +41,11 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
 
     }
 
+    public void setItemHeight(double height){
+        this.height = height;
+        notifyDataSetChanged();
+    }
+
 
 
     @NonNull
