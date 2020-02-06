@@ -1,33 +1,30 @@
 package tech.yashtiwari.verkada.fragment.home;
 
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import io.reactivex.Observable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.SharedPred.TinyDB;
-import tech.yashtiwari.verkada.Utils.*;
+import tech.yashtiwari.verkada.Utils.CommonUtility;
 import tech.yashtiwari.verkada.adapter.RVMotionZoneTimeAdapter;
 import tech.yashtiwari.verkada.databinding.HomePageFragmentBinding;
 import tech.yashtiwari.verkada.dialog.BottomSheetDateDailog;
@@ -71,7 +68,6 @@ public class HomePageFragment extends Fragment{
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setRetainInstance(true);
     }
 
     @Override
@@ -84,17 +80,14 @@ public class HomePageFragment extends Fragment{
             Bundle data = getArguments();
             long startDate = data.getLong("start_time");
             long endDate = data.getLong("end_time");
-            ArrayList<Integer> zones = data.getIntegerArrayList("zones");
-
+            final ArrayList<Integer> zones = data.getIntegerArrayList("zones");
             MotionSearchBody body = new MotionSearchBody();
             body.setStartTimeSec(startDate/1000);
             body.setEndTimeSec(endDate/1000);
-
             ArrayList<List<Integer>> k = CommonUtility.getListOfArray(zones);
-
             body.setMotionZones(k);
-
-            getmViewModel().makeAPICall(body);
+            String hashCode = CommonUtility.generateUniqueHashCodeForArrayList(zones);
+            getmViewModel().checkIfInCache(body, hashCode);
         }
 
 
@@ -109,18 +102,11 @@ public class HomePageFragment extends Fragment{
             public void onChanged(List<DateAndDuration> lists) {
                 if(lists != null){
                     mAdapter.setList(lists);
-                } else {
-                    binding.tv.setText("No Data found");
                 }
             }
         });
 
-        getmViewModel().mldNextEndTime.observe(this, new Observer<Long>() {
-            @Override
-            public void onChanged(Long nxtEndTime) {
-                binding.tv.setText(CommonUtility.getDateTimeInString(nxtEndTime * 1000));
-            }
-        });
+
     }
 
 

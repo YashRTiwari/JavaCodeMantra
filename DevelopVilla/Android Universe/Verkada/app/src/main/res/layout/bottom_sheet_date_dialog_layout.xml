@@ -107,18 +107,32 @@
                 android:layout_marginBottom="48dp"
                 android:orientation="vertical">
 
-                <ToggleButton
-                    android:id="@+id/tbSelectDeselect"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/tb_zone_style"
-                    android:checked="true"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textOff="Deselect Mode"
-                    android:textOn="Select Mode" />
+                    android:orientation="horizontal">
+
+                    <ToggleButton
+                        android:id="@+id/tbSelectDeselect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_margin="4dp"
+                        android:background="@drawable/tb_zone_style"
+                        android:checked="true"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textOff="Deselect Mode"
+                        android:textOn="Select Mode" />
+
+                    <Button
+                        android:id="@+id/btnClearSelection"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Clear Selection"/>
+
+                </LinearLayout>
+
 
                 <FrameLayout
                     android:layout_width="match_parent"

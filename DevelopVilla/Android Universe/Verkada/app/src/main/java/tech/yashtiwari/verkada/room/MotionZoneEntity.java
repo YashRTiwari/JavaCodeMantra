@@ -6,17 +6,27 @@ import androidx.room.PrimaryKey;
 @Entity
 public class MotionZoneEntity {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    long id;
     long timeInSec = -1l;
     long nextEndTimeSec = -1l;
-    long durationSexc = 0;
+    long durationSec = 0;
+    String hashCode = "";
 
-    public long getDurationSexc() {
-        return durationSexc;
+    public String getHashCode() {
+        return hashCode;
     }
 
-    public void setDurationSexc(long durationSexc) {
-        this.durationSexc = durationSexc;
+    public void setHashCode(String hashCode) {
+        this.hashCode = hashCode;
+    }
+
+    public long getDurationSec() {
+        return durationSec;
+    }
+
+    public void setDurationSec(long durationSec) {
+        this.durationSec = durationSec;
     }
 
     public long getTimeInSec() {

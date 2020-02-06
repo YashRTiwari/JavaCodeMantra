@@ -16,16 +16,30 @@ import io.reactivex.Observable;
 @Dao
 public interface MotionZoneDataAccessObject {
 
+    /**
+     *
+     * @return - returns whole data stored in the table
+     */
     @Query("Select * from motionzoneentity")
     public Observable<List<MotionZoneEntity>> getAllMotionZones();
 
+    /**
+     *
+     * @param entity - Data to be stored
+     */
     @Insert
     public void insertZone(MotionZoneEntity entity);
 
-    @Query("Select * from motionzoneentity WHERE timeInSec >= :start AND timeInSec <= :end")
-    public Observable<List<MotionZoneEntity>> getMotionsBetween(long start, long end);
 
-
+    /**
+     *
+     * @param start - start time in seconds
+     * @param end - end time in seconds
+     * @param hashCode - unique value of zones selected
+     * @return
+     */
+    @Query("Select * from motionzoneentity WHERE timeInSec >= :start AND timeInSec <= :end AND hashCode = :hashCode")
+    public Observable<List<MotionZoneEntity>> getMotionsBetween(long start, long end, String hashCode);
 
     @Delete
     void delete(MotionZoneEntity entity);

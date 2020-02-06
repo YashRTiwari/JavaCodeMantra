@@ -2,21 +2,19 @@ package tech.yashtiwari.verkada;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
-import android.widget.Toast;
 
-import io.reactivex.disposables.CompositeDisposable;
-import tech.yashtiwari.verkada.databinding.ActivityMainBinding;
+import java.util.List;
+
+import io.reactivex.Observable;
 import tech.yashtiwari.verkada.dialog.BottomSheetDateDailog;
 import tech.yashtiwari.verkada.fragment.home.HomePageFragment;
-import tech.yashtiwari.verkada.retrofit.RetrofitInterface;
+import tech.yashtiwari.verkada.room.MotionZoneEntity;
 import tech.yashtiwari.verkada.room.MotionZonesDatabase;
 
 public class MainActivity extends AppCompatActivity implements Navigator {
@@ -28,19 +26,16 @@ public class MainActivity extends AppCompatActivity implements Navigator {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "onCreate: ");
         if (savedInstanceState == null)
             moveToBDSSFragment(null);
-        MotionZonesDatabase db = App.getDatabaseInstance();
+
     }
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE || newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-
-        }
     }
+
 
     @Override
     public void moveToBDSSFragment(Bundle bundle) {
@@ -50,9 +45,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         if (bundle != null)
             bottomSheetDateDailog.setArguments(bundle);
         transaction.add(R.id.frame, bottomSheetDateDailog, bottomSheetDateDailog.TAG);
-        transaction.addToBackStack(bottomSheetDateDailog.TAG);
         transaction.commit();
-
     }
 
     @Override

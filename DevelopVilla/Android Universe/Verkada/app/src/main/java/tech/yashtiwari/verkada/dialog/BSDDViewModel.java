@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import tech.yashtiwari.verkada.Navigator;
 import tech.yashtiwari.verkada.SharedPred.TinyDB;
@@ -44,17 +45,23 @@ public class BSDDViewModel extends ViewModel {
 
 
     /*TODO*/
-    public void updateListZones(int position, boolean add) {
-        Log.d(TAG, "updateListZones: ");
-        if (!add)
-            zones.remove((Integer) position);
-        else
-            zones.add(position);
+    public void updateListZones(int position, boolean add, boolean fromTouchListener) {
+
+        if (fromTouchListener){
+            if (!add && zones.contains(position)){
+                zones.remove(position);
+            } else if (add && !zones.contains(position))
+                zones.add(position);
+        } else {
+            if (!add)
+                zones.remove((Integer) position);
+            else
+                zones.add(position);
+        }
         communicateInterface.pushDataToAdapterList(position, add);
     }
 
     public void update() {
-        Log.d(TAG, "update: ");
         mldZoneList.setValue(zones);
     }
 
@@ -105,7 +112,7 @@ public class BSDDViewModel extends ViewModel {
                 if (oiEndTime.getValue() != 0)
                     return oiEndTime.getValue();
             }
-            else return oiEndDate.getValue();
+            return oiEndDate.getValue();
         }
         return 0;
 
@@ -115,7 +122,7 @@ public class BSDDViewModel extends ViewModel {
     public void moveDataToHomePage() {
 
         if (getStartDateTime() > getEndDateTime()) {
-            Toast.makeText(context, "Time invalid", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Start time cannot be greater than end time, check time.", Toast.LENGTH_SHORT).show();
         } else if (getEndDateTime() == 0) {
             Toast.makeText(context, "Select End Time", Toast.LENGTH_SHORT).show();
         } else if (getStartDateTime() == 0) {
@@ -123,9 +130,7 @@ public class BSDDViewModel extends ViewModel {
         } else if (getListZones().size() == 0){
             Toast.makeText(context, "Select Zones", Toast.LENGTH_SHORT).show();
         }else {
-
             saveToPref();
-
             Bundle bundle = new Bundle();
             bundle.putLong("start_time", getStartDateTime());
             bundle.putLong("end_time", getEndDateTime());
@@ -134,11 +139,23 @@ public class BSDDViewModel extends ViewModel {
         }
     }
 
+    public void setZones(ArrayList<Integer> z){
+
+
+        if (z == null)
+            return;
+        ListIterator<Integer> li = z.listIterator();
+        while (li.hasNext()){
+            updateListZones(li.next(), true, false);
+        }
+    }
+
     private void saveToPref() {
 
         TinyDB tinyDB = new TinyDB(context);
         tinyDB.putLong(Constant.START_DATE, oiStartDate.getValue());
         tinyDB.putLong(Constant.END_DATE, oiEndTime.getValue());
+        tinyDB.putListInt(Constant.LAST_ZONES, getListZones());
 
     }
 }

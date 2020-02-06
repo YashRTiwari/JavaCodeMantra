@@ -9,36 +9,53 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
+import tech.yashtiwari.verkada.room.MotionZoneEntity;
 
+import static tech.yashtiwari.verkada.Utils.Constant.SDF;
 import static tech.yashtiwari.verkada.Utils.Constant.TAG_YASH;
 
 public class CommonUtility {
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy",
-            Locale.ENGLISH);
 
-    public static String getDateTimeInString(Long dateTimeInSECONDS) {
-        Calendar calender = Calendar.getInstance();
-        calender.setTimeInMillis(dateTimeInSECONDS);
-        Date date = calender.getTime();
-        SimpleDateFormat print = new SimpleDateFormat("MMM dd yyyy, HH:mm ");
-        Date parsedDate = null;
-        try {
-            parsedDate = sdf.parse(date.toString());
-            return print.format(parsedDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    public static String getDateTimeInString(Long dateTimeInSECONDS) {
+//        Calendar calender = Calendar.getInstance();
+//        calender.setTimeInMillis(dateTimeInSECONDS);
+//        Date date = calender.getTime();
+//        SimpleDateFormat print = new SimpleDateFormat("MMM dd yyyy, HH:mm ");
+//        Date parsedDate = null;
+//
+//
+//        try {
+//            parsedDate = SDF.parse(date.toString());
+//            return print.format(parsedDate);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
+    /**
+     * Converts long valued time in string format.
+     * Mainly for getting Month, day and year
+     * @param dateTimeInSECONDS
+     * @return
+     */
     public static String getDateInString(Long dateTimeInSECONDS) {
         Calendar calender = Calendar.getInstance();
         calender.setTimeInMillis(dateTimeInSECONDS);
@@ -46,7 +63,7 @@ public class CommonUtility {
         SimpleDateFormat print = new SimpleDateFormat("MMM d, yyyy");
         Date parsedDate = null;
         try {
-            parsedDate = sdf.parse(date.toString());
+            parsedDate = SDF.parse(date.toString());
             return print.format(parsedDate);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -54,6 +71,12 @@ public class CommonUtility {
         return null;
     }
 
+    /**
+     * Converts long valued time in string format.
+     * Mainly for getting hour and minute
+     * @param dateTimeInSECONDS
+     * @return
+     */
     public static String getTimeInString(Long dateTimeInSECONDS) {
         Calendar calender = Calendar.getInstance();
         calender.setTimeInMillis(dateTimeInSECONDS);
@@ -61,7 +84,7 @@ public class CommonUtility {
         SimpleDateFormat print = new SimpleDateFormat("HH : mm");
         Date parsedDate = null;
         try {
-            parsedDate = sdf.parse(date.toString());
+            parsedDate = SDF.parse(date.toString());
             return print.format(parsedDate);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -69,78 +92,115 @@ public class CommonUtility {
         return null;
     }
 
+    /**
+     * Helper function to convert recyclerview position value
+     * to cordinate format [x, y]
+     * @param list
+     * @return
+     */
     public static final ArrayList<List<Integer>> getListOfArray(ArrayList<Integer> list) {
-
         ArrayList<List<Integer>> a = new ArrayList<>();
-
-        HashSet<Integer> u = new HashSet<>();
-        for (int y : list) {
-            u.add(y);
-        }
-
-        for (int i : u) {
-
+        Iterator<Integer> liU = list.iterator();
+        while (liU.hasNext()) {
             List<Integer> l = new ArrayList<>();
+            int i = liU.next();
             l.add(i % 10);
             l.add(i / 10);
             a.add(l);
         }
-
         return a;
-
     }
 
+    /**
+     * Generates a string value unique for all zone selection
+     * used in searching database for select zones.
+     * @param list
+     * @return
+     */
+    public static String generateUniqueHashCodeForArrayList(ArrayList<Integer> list) {
+
+        if (list == null)
+            if (list.size() == 0)
+                return null;
+        String hashCode = "";
+        Collections.sort(list);
+        for (int z : list) {
+            hashCode += String.valueOf(z);
+        }
+        return hashCode;
+    }
+
+
+    /**
+     * converts cordinate based data to DateAndDuration class
+     * format, so as to be used in recyclerview
+     * @param lists
+     * @return
+     */
     public static List<DateAndDuration> getDateDurationList(List<List<Long>> lists) {
 
         List<DateAndDuration> result = new ArrayList<>();
-
         int maxDuration = -1;
 
-        for (List<Long> l : lists) {
-            DateAndDuration entity = new DateAndDuration();
-            long time = l.get(0) * 1000;
-            Calendar calender = Calendar.getInstance();
-            calender.setTimeInMillis(time);
-            Date date = calender.getTime();
+        ListIterator<List<Long>> liResponse = lists.listIterator();
 
-            SimpleDateFormat d = new SimpleDateFormat("dd");
-            SimpleDateFormat m = new SimpleDateFormat("MMM");
-            SimpleDateFormat y = new SimpleDateFormat("yyyy");
-            SimpleDateFormat h = new SimpleDateFormat("hh");
-            SimpleDateFormat mm = new SimpleDateFormat("mm");
-
-            if (maxDuration < (int) (long) l.get(1)) {
-                maxDuration = (int) (long) l.get(1);
+        while (liResponse.hasNext()) {
+            List<Long> current = liResponse.next();
+            long time = current.get(0) * 1000;
+            int duration = (int) (long) current.get(1);
+            if (maxDuration < duration) {
+                maxDuration = duration;
             }
-
-            Date parsedDate = null;
-            try {
-                parsedDate = sdf.parse(date.toString());
-
-                entity.setDay(Integer.parseInt(d.format(parsedDate)));
-                entity.setMonth(m.format(parsedDate));
-                entity.setYear(Integer.parseInt(y.format(parsedDate)));
-                entity.setHour(Integer.parseInt(h.format(parsedDate)));
-                entity.setMinute(Integer.parseInt(mm.format(parsedDate)));
-                entity.setoDuration((int) (long) l.get(1));
-
-                result.add(entity);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            DateAndDuration entity = new DateAndDuration(time, duration);
+            result.add(entity);
         }
 
-        Log.d(TAG_YASH, "maxDuration: " + maxDuration);
-        for (int i = 0; i < result.size(); i++) {
-            int inD = result.get(i).getoDuration();
-            int fD = (int) (((float) inD / (float) maxDuration) * 100);
-            Log.d(TAG_YASH, "finalDuration: " + fD);
-            result.get(i).setDuration(fD);
+        ListIterator<DateAndDuration> listIterator = result.listIterator();
+        while (listIterator.hasNext()) {
+            listIterator.next().updateDurationToPercent(maxDuration);
+        }
+        return result;
+    }
+
+
+    /**
+     * converts database response to DateAndDuration format
+     *
+     * @param lists
+     * @return
+     */
+    public static List<DateAndDuration> getDateDurationList2(List<MotionZoneEntity> lists) {
+        int maxDuration = -1;
+        List<DateAndDuration> result = new ArrayList<>();
+        ListIterator<MotionZoneEntity> liMotionZoneEntity = lists.listIterator();
+
+        while (liMotionZoneEntity.hasNext()) {
+            MotionZoneEntity current = liMotionZoneEntity.next();
+            long time = current.getTimeInSec() * 1000;
+            int duration = (int) current.getDurationSec();
+            if (maxDuration < duration) {
+                maxDuration = duration;
+            }
+            DateAndDuration dateAndDuration = new DateAndDuration(time, duration);
+            result.add(dateAndDuration);
+        }
+
+        ListIterator<DateAndDuration> listIterator = result.listIterator();
+        while (listIterator.hasNext()) {
+            listIterator.next().updateDurationToPercent(maxDuration);
         }
 
         return result;
     }
 
+    /**
+     * Maps the percentile value of duration
+     * to four of the images,
+     * Used to provide a different ui experience
+     * @param context
+     * @param value
+     * @return
+     */
     public static Drawable getSignalDrawable(Context context, int value) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -157,6 +217,10 @@ public class CommonUtility {
     }
 
 
+    /*
+    * Functions implemented to expand and collapse the view
+    * out of scope for this project, as of now.
+    * */
 //    public static void expand(final View v) {
 //        int matchParentMeasureSpec = View.MeasureSpec.makeMeasureSpec(((View)v.getParent()).getWidth(), View.MeasureSpec.EXACTLY);
 //        int wrapContentMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);

@@ -9,6 +9,11 @@ import tech.yashtiwari.verkada.retrofit.entity.MotionSearchBody;
 
 public interface RetrofitInterface {
 
+    /**
+     * Retrofit interface - calls the Verkada Api for motionAt functionality data.
+     * @param motionSearchRequest
+     * @return
+     */
     @Headers("Content-Type: application/json")
     @POST("/ios/search")
     Observable<ResponseBody> motionSearch(@Body MotionSearchBody motionSearchRequest);

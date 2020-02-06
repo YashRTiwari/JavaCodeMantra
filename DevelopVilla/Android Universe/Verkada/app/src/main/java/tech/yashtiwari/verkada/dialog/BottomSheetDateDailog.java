@@ -19,6 +19,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import tech.yashtiwari.verkada.adapter.GVSelectZones;
 import tech.yashtiwari.verkada.databinding.BottomSheetDateDialogLayoutBinding;
 
 import static tech.yashtiwari.verkada.Utils.Constant.END_DATE;
+import static tech.yashtiwari.verkada.Utils.Constant.LAST_ZONES;
 import static tech.yashtiwari.verkada.Utils.Constant.START_DATE;
 import static tech.yashtiwari.verkada.Utils.Constant.TAG_YASH;
 
@@ -65,7 +67,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
 
     @Override
     public void tbCheckListener(boolean isChecked, int position) {
-        viewModel.updateListZones(position, isChecked);
+        viewModel.updateListZones(position, isChecked,false);
         Log.d(TAG_YASH, "tbCheckListener: ");
     }
 
@@ -128,6 +130,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         binding.tvStartDate.setOnClickListener(this);
         binding.tvStartTime.setOnClickListener(this);
         binding.btnSubmit.setOnClickListener(this);
+        binding.btnClearSelection.setOnClickListener(this);
         Log.d(TAG_YASH, "setListeners: ");
 
         binding.rvSelectZone.setOnTouchListener(new View.OnTouchListener() {
@@ -145,7 +148,7 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
 
                 if ((i >= 0 || i < 10) && (j >= 0 || j < 10)) {
                     int position = j * 10 + i;
-                    viewModel.updateListZones(position, revertAction);
+                    viewModel.updateListZones(position, revertAction,true);
                 }
                 return false;
             }
@@ -165,12 +168,14 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
         Log.d(TAG_YASH, "onViewCreated: ");
         setUpRVZones();
         setListeners();
+
         subscribeToLiveData();
 
         viewModel.setOiStartDate(tinyDB.getLong(START_DATE, 0l));
         viewModel.setOiEndDate(tinyDB.getLong(END_DATE, 0l));
         viewModel.setOiStartTime(tinyDB.getLong(START_DATE, 0l));
         viewModel.setOiEndTime(tinyDB.getLong(END_DATE, 0l));
+        viewModel.setZones(tinyDB.getListInt(LAST_ZONES));
 
     }
 
@@ -271,6 +276,10 @@ public class BottomSheetDateDailog extends Fragment implements View.OnClickListe
                 break;
             case R.id.btnSubmit:
                 viewModel.moveDataToHomePage();
+                break;
+            case R.id.btnClearSelection:
+                viewModel.getListZones().clear();
+                gvAdapter.clearSelection();
                 break;
         }
     }

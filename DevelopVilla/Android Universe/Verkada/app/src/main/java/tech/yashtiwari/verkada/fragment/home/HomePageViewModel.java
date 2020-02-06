@@ -2,7 +2,6 @@ package tech.yashtiwari.verkada.fragment.home;
 
 import android.util.Log;
 
-import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableBoolean;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -10,19 +9,18 @@ import androidx.lifecycle.ViewModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.reactivestreams.Subscription;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import tech.yashtiwari.verkada.App;
@@ -42,10 +40,9 @@ public class HomePageViewModel extends ViewModel {
     private RetrofitInterface apiInterface = RetrofitClient.getInstance().create(RetrofitInterface.class);
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     public ObservableBoolean isDataFound = new ObservableBoolean(false);
-    public MutableLiveData<Long> mldNextEndTime = new MutableLiveData<>();
     private MotionZonesDatabase db = App.getDatabaseInstance();
 
-    public void makeAPICall(MotionSearchBody motionSearchBody) {
+    private void makeAPICall(MotionSearchBody motionSearchBody, final String hashCode) {
 
         apiInterface.motionSearch(motionSearchBody)
                 .subscribeOn(Schedulers.io())
@@ -65,22 +62,8 @@ public class HomePageViewModel extends ViewModel {
                             Log.d(TAG, "onNext: "+response);
                             MotionSearchResponse entity = new Gson().fromJson(response, new TypeToken<MotionSearchResponse>() {
                             }.getType());
-
-                            if (entity != null) {
-                                if (entity.getMotionAt().size() > 0) {
-
-                                    List<DateAndDuration> rvList = CommonUtility.getDateDurationList(entity.getMotionAt());
-                                    mldMotionAt.setValue(rvList);
-                                    mldNextEndTime.setValue(entity.getNextEndTimeSec());
-                                    isDataFound.set(true);
-                                    //addListToDatabase(entity.getMotionAt(), entity.getNextEndTimeSec());
-
-                                } else {
-                                    mldMotionAt.setValue(null);
-                                    isDataFound.set(false);
-                                }
-                            }
-
+                            addListToDatabase(entity.getMotionAt(), hashCode);
+                            showListInRecyclerView(CommonUtility.getDateDurationList(entity.getMotionAt()));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -98,46 +81,55 @@ public class HomePageViewModel extends ViewModel {
                 });
     }
 
-    private void addListToDatabase(List<List<Long>> motionAt, long nextEndTimeSec) {
+
+
+
+
+    private void showListInRecyclerView(List<DateAndDuration> rvList){
+        if (rvList != null) {
+            if (rvList.size() > 0) {
+                mldMotionAt.setValue(rvList);
+                isDataFound.set(true);
+            } else {
+                mldMotionAt.setValue(null);
+                isDataFound.set(false);
+            }
+        }
+    }
+
+    private void addListToDatabase(List<List<Long>> motionAt, String hashCode) {
+        Log.d(TAG, "addListToDatabase: ");
         for (List<Long> l : motionAt) {
             long time = l.get(0);
             long duration = l.get(1);
             MotionZoneEntity entity = new MotionZoneEntity();
             entity.setTimeInSec(time);
-            entity.setDurationSexc(duration);
-            entity.setNextEndTimeSec(nextEndTimeSec);
+            entity.setDurationSec(duration);
+            entity.setHashCode(hashCode);
             db.getMotionZoneDAO()
                     .insertZone(entity);
         }
     }
 
-    public void checkIfInCache(long start, long end, final MotionSearchBody body) {
+    public void checkIfInCache(final MotionSearchBody body, final String hashCode) {
+
+
 
         db.getMotionZoneDAO()
-                .getMotionsBetween(start, end)
+                .getMotionsBetween(body.getStartTimeSec(), body.getEndTimeSec(),
+                        hashCode)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<List<MotionZoneEntity>>() {
                     @Override
                     public void accept(List<MotionZoneEntity> motionZoneEntities) throws Exception {
-//                        if (motionZoneEntities.size() > 0) {
-//                            Log.d(TAG, "Data found in memory");
-//                            List<List<Long>> data = new ArrayList<>();
-//                            for (MotionZoneEntity e : motionZoneEntities) {
-//                                List<Long> l = new ArrayList<>();
-//                                l.add(e.getTimeInSec());
-//                                l.add(e.getDurationSexc());
-//                                data.add(l);
-//                            }
-//
-//                            Log.d(TAG,"FOUND Start==>"+data.get(0).get(0));
-//                            Log.d(TAG,"FOUND End  ==>"+data.get(data.size() -1).get(0));
-//                        } else {
-//                            Log.d(TAG, "Data not found in memory");
-//
-//                        }
+                        if (motionZoneEntities.size() > 0) {
+                            showListInRecyclerView(CommonUtility.getDateDurationList2(motionZoneEntities));
+                        } else {
+                            Log.d(TAG, "Data not found in memory");
+                            makeAPICall(body, hashCode);
+                        }
 
-                        //makeAPICall(body);
                     }
                 });
 

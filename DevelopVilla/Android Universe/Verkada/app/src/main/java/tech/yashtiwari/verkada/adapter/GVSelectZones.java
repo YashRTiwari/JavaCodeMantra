@@ -46,6 +46,11 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
         notifyDataSetChanged();
     }
 
+    public void clearSelection(){
+        zoneList = new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
 
 
     @NonNull
