@@ -1,23 +1,19 @@
 package tech.yashtiwari.verkada.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.databinding.RowSelectZonesBinding;
 
@@ -34,23 +30,22 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
         void tbCheckListener(boolean isChecked, int position);
     }
 
-    public GVSelectZones(Context context, float height, TbListener listener ) {
+    public GVSelectZones(Context context, float height, TbListener listener) {
         this.context = context;
         this.listener = listener;
         this.height = height / 10.0;
 
     }
 
-    public void setItemHeight(double height){
+    public void setItemHeight(double height) {
         this.height = height;
         notifyDataSetChanged();
     }
 
-    public void clearSelection(){
+    public void clearSelection() {
         zoneList = new ArrayList<>();
         notifyDataSetChanged();
     }
-
 
 
     @NonNull
@@ -62,12 +57,12 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
     }
 
     public void addRemoveZones(int zone, boolean add) {
-        boolean contains =  zoneList.contains(zone);
+        boolean contains = zoneList.contains(zone);
         Log.d(TAG, "addRemoveZones: ");
         if (!contains && add) {
             this.zoneList.add(zone);
             notifyItemChanged(zone);
-        } else if (contains && !add){
+        } else if (contains && !add) {
             this.zoneList.remove((Integer) zone);
             notifyItemChanged(zone);
         }
@@ -85,15 +80,21 @@ public class GVSelectZones extends RecyclerView.Adapter<GVSelectZones.ViewHolder
                     Log.d(TAG, "onBindViewHolder: contains");
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         holder.binding.tb.setBackgroundDrawable(context.getDrawable(R.drawable.selected_border));
-                        holder.binding.tb.setChecked(true);
-                    }
+                    } else
+                        holder.binding.tb.setBackground(context.getResources().getDrawable(R.drawable.selected_border));
+
+                    holder.binding.tb.setChecked(true);
+
                 } else {
                     Log.d(TAG, "onBindViewHolder: doesnt contains");
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         holder.binding.tb.setBackgroundDrawable(context.getDrawable(R.drawable.border));
-                        holder.binding.tb.setChecked(false);
-                    }
+                    } else
+                        holder.binding.tb.setBackground(context.getResources().getDrawable(R.drawable.border));
+                    holder.binding.tb.setChecked(false);
+
+
                 }
 
             }

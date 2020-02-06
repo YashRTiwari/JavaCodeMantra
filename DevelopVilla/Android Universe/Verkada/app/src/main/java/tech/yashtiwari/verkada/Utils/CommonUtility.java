@@ -3,32 +3,22 @@ package tech.yashtiwari.verkada.Utils;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Locale;
 
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import tech.yashtiwari.verkada.R;
 import tech.yashtiwari.verkada.retrofit.entity.DateAndDuration;
 import tech.yashtiwari.verkada.room.MotionZoneEntity;
 
 import static tech.yashtiwari.verkada.Utils.Constant.SDF;
-import static tech.yashtiwari.verkada.Utils.Constant.TAG_YASH;
 
 public class CommonUtility {
 
@@ -53,6 +43,7 @@ public class CommonUtility {
     /**
      * Converts long valued time in string format.
      * Mainly for getting Month, day and year
+     *
      * @param dateTimeInSECONDS
      * @return
      */
@@ -74,6 +65,7 @@ public class CommonUtility {
     /**
      * Converts long valued time in string format.
      * Mainly for getting hour and minute
+     *
      * @param dateTimeInSECONDS
      * @return
      */
@@ -95,6 +87,7 @@ public class CommonUtility {
     /**
      * Helper function to convert recyclerview position value
      * to cordinate format [x, y]
+     *
      * @param list
      * @return
      */
@@ -114,6 +107,7 @@ public class CommonUtility {
     /**
      * Generates a string value unique for all zone selection
      * used in searching database for select zones.
+     *
      * @param list
      * @return
      */
@@ -134,6 +128,7 @@ public class CommonUtility {
     /**
      * converts cordinate based data to DateAndDuration class
      * format, so as to be used in recyclerview
+     *
      * @param lists
      * @return
      */
@@ -197,6 +192,7 @@ public class CommonUtility {
      * Maps the percentile value of duration
      * to four of the images,
      * Used to provide a different ui experience
+     *
      * @param context
      * @param value
      * @return
@@ -212,15 +208,23 @@ public class CommonUtility {
                 return context.getDrawable(R.drawable.rect_3);
             else
                 return context.getDrawable(R.drawable.rect_4);
-        } else
-            return null;
+        } else {
+            if (value <= 25) {
+                return context.getResources().getDrawable(R.drawable.rect_1);
+            } else if (value <= 50)
+                return context.getResources().getDrawable(R.drawable.rect_2);
+            else if (value <= 75)
+                return context.getResources().getDrawable(R.drawable.rect_3);
+            else
+                return context.getResources().getDrawable(R.drawable.rect_4);
+        }
     }
 
 
     /*
-    * Functions implemented to expand and collapse the view
-    * out of scope for this project, as of now.
-    * */
+     * Functions implemented to expand and collapse the view
+     * out of scope for this project, as of now.
+     * */
 //    public static void expand(final View v) {
 //        int matchParentMeasureSpec = View.MeasureSpec.makeMeasureSpec(((View)v.getParent()).getWidth(), View.MeasureSpec.EXACTLY);
 //        int wrapContentMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
