@@ -44,7 +44,6 @@ public class BSDDViewModel extends ViewModel {
     }
 
 
-    /*TODO*/
     public void updateListZones(int position, boolean add, boolean fromTouchListener) {
 
         if (fromTouchListener){
